@@ -1,17 +1,17 @@
 <!DOCTYPE html><html lang="en-US"><head><style>
   body {
-    background: linear-gradient(135deg, #181c24 0%, #232a34 100%);
+    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf3 100%);
     font-family: 'Open Sans', 'Roboto', Arial, sans-serif;
     margin:0;
-    color: #e6e6e6;
+    color: #22223b;
   }
   header {
-    background: linear-gradient(90deg, #232a34 0%, #181c24 100%);
-    color: #ffd700;
+    background: linear-gradient(90deg, #4f5bd5 0%, #6a82fb 100%);
+    color: #fff;
     padding: 2rem 0;
     text-align: center;
-    box-shadow: 0 2px 8px rgba(30,60,114,0.25);
-    border-bottom: 2px solid #ffd700;
+    box-shadow: 0 2px 8px rgba(79,91,213,0.15);
+    border-bottom: 2px solid #6a82fb;
   }
   header h1 {
     font-size:3rem;
@@ -19,69 +19,69 @@
     letter-spacing:-2px;
     font-family: 'Roboto Condensed', 'Open Sans', Arial, sans-serif;
     font-weight: 700;
-    color: #ffd700;
-    text-shadow: 0 2px 8px #232a34;
+    color: #fff;
+    text-shadow: 0 2px 8px #6a82fb;
   }
   header p {
     font-size:1.2rem;
     margin-top:0.5rem;
-    color: #e6e6e6;
+    color: #e9ecf3;
   }
   #live-carousel {
-    background: linear-gradient(90deg, #232a34 0%, #181c24 100%);
-    color: #e6e6e6;
+    background: linear-gradient(90deg, #6a82fb 0%, #4f5bd5 100%);
+    color: #fff;
     font-size:1.1rem;
     font-weight:600;
     padding:0.7rem 0;
     overflow:hidden;
     position:relative;
-    border-bottom: 1px solid #ffd700;
+    border-bottom: 1px solid #4f5bd5;
   }
   #carousel-content span {
     font-family: 'Roboto Mono', 'Consolas', monospace;
     margin-right:2.5rem;
     font-size:1.05rem;
-    background:rgba(24,28,36,0.7);
+    background:rgba(106,130,251,0.08);
     border-radius:6px;
     padding:0.3rem 1rem;
-    box-shadow:0 1px 4px rgba(30,60,114,0.12);
+    box-shadow:0 1px 4px rgba(79,91,213,0.08);
   }
   #carousel-content span span {
     font-weight:700;
   }
   nav {
-    background:#232a34;
-    box-shadow:0 2px 8px rgba(30,60,114,0.18);
+    background:#fff;
+    box-shadow:0 2px 8px rgba(79,91,213,0.10);
     display:flex;
     justify-content:center;
     gap:2rem;
     padding:1rem 0;
     font-size:1.1rem;
-    border-bottom: 1px solid #ffd700;
+    border-bottom: 1px solid #6a82fb;
   }
   nav a {
-    color:#ffd700;
+    color:#4f5bd5;
     text-decoration:none;
     font-weight:600;
     padding:0.5rem 1.2rem;
     border-radius:6px;
-    transition: background 0.2s;
+    transition: background 0.2s, color 0.2s;
   }
   nav a:hover {
-    background: #181c24;
-    color: #fff;
+    background: #e9ecf3;
+    color: #6a82fb;
   }
   main {
     max-width:900px;
     margin:2rem auto;
-    background:rgba(24,28,36,0.95);
+    background:#fff;
     border-radius:16px;
-    box-shadow:0 4px 24px rgba(30,60,114,0.18);
+    box-shadow:0 4px 24px rgba(79,91,213,0.10);
     padding:2rem;
-    border: 1px solid #232a34;
+    border: 1px solid #e9ecf3;
   }
   section h2 {
-    color:#ffd700;
+    color:#4f5bd5;
     font-family: 'Roboto Condensed', 'Open Sans', Arial, sans-serif;
     font-size:2rem;
     margin-bottom:0.7rem;
@@ -89,30 +89,30 @@
     letter-spacing:-1px;
   }
   #gallery h2, #comments h2, #forex-news h2, #about h2 {
-    color:#ffd700;
+    color:#6a82fb;
   }
   #admin-upload-form {
     margin-bottom:1.5rem;
-    background:#232a34;
+    background:#e9ecf3;
     padding:1rem;
     border-radius:8px;
-    box-shadow:0 2px 8px rgba(30,60,114,0.12);
-    border: 1px solid #ffd700;
+    box-shadow:0 2px 8px rgba(79,91,213,0.08);
+    border: 1px solid #6a82fb;
   }
   #admin-upload-form label {
-    color:#ffd700;
+    color:#4f5bd5;
     font-weight:600;
   }
   #admin-upload-form input[type="file"] {
-    background:#181c24;
-    color:#ffd700;
-    border:1px solid #ffd700;
+    background:#fff;
+    color:#4f5bd5;
+    border:1px solid #6a82fb;
     border-radius:4px;
     padding:0.3rem;
   }
   #admin-upload-form button {
-    background:#ffd700;
-    color:#232a34;
+    background:#6a82fb;
+    color:#fff;
     border:none;
     padding:0.5rem 1.5rem;
     border-radius:4px;
@@ -122,8 +122,8 @@
     transition: background 0.2s;
   }
   #admin-upload-form button:hover {
-    background:#e6e6e6;
-    color:#181c24;
+    background:#4f5bd5;
+    color:#fff;
   }
   #media-gallery {
     display:grid;
@@ -131,19 +131,19 @@
     gap:1rem;
   }
   #media-gallery > div {
-    background:#232a34;
+    background:#e9ecf3;
     border-radius:8px;
-    color:#ffd700;
+    color:#4f5bd5;
     font-size:1.2rem;
-    box-shadow:0 2px 8px rgba(30,60,114,0.12);
-    border: 1px solid #ffd700;
+    box-shadow:0 2px 8px rgba(79,91,213,0.08);
+    border: 1px solid #6a82fb;
     padding:0.5rem;
   }
   #media-gallery img, #media-gallery video {
     border-radius:8px;
-    box-shadow:0 2px 8px rgba(30,60,114,0.18);
-    border: 1px solid #ffd700;
-    background: #181c24;
+    box-shadow:0 2px 8px rgba(79,91,213,0.10);
+    border: 1px solid #6a82fb;
+    background: #fff;
   }
   #media-gallery button {
     background: #e74c3c;
@@ -153,7 +153,7 @@
     padding: 0.3rem 0.8rem;
     cursor: pointer;
     font-weight:700;
-    box-shadow:0 1px 4px rgba(30,60,114,0.12);
+    box-shadow:0 1px 4px rgba(79,91,213,0.08);
   }
   #comments {
     margin-top:2rem;
@@ -161,15 +161,15 @@
   #comment-form textarea {
     width:100%;
     border-radius:8px;
-    border:1px solid #ffd700;
+    border:1px solid #6a82fb;
     padding:0.5rem;
     font-size:1rem;
-    background:#181c24;
-    color:#ffd700;
+    background:#fff;
+    color:#4f5bd5;
   }
   #comment-form button {
-    background:#ffd700;
-    color:#232a34;
+    background:#6a82fb;
+    color:#fff;
     border:none;
     padding:0.5rem 1.5rem;
     border-radius:4px;
@@ -180,48 +180,48 @@
     transition: background 0.2s;
   }
   #comment-form button:hover {
-    background:#e6e6e6;
-    color:#181c24;
+    background:#4f5bd5;
+    color:#fff;
   }
   #comment-list li {
-    background: #232a34;
-    color: #ffd700;
+    background: #e9ecf3;
+    color: #4f5bd5;
     margin-bottom: 0.5rem;
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    border: 1px solid #ffd700;
+    border: 1px solid #6a82fb;
     font-family: 'Roboto Mono', 'Consolas', monospace;
   }
   #forex-news-list {
-    background:#232a34;
+    background:#e9ecf3;
     border-radius:12px;
-    box-shadow:0 2px 8px rgba(30,60,114,0.14);
+    box-shadow:0 2px 8px rgba(79,91,213,0.10);
     padding:1.5rem;
-    border: 1px solid #ffd700;
+    border: 1px solid #6a82fb;
   }
   #forex-news-list div {
-    background:#181c24;
-    color:#ffd700;
+    background:#fff;
+    color:#4f5bd5;
     margin-bottom:0.7rem;
     padding:0.7rem 1rem;
     border-radius:8px;
     font-size:1.05rem;
-    box-shadow:0 1px 4px rgba(30,60,114,0.10);
+    box-shadow:0 1px 4px rgba(79,91,213,0.06);
     font-family: 'Roboto Mono', 'Consolas', monospace;
-    border: 1px solid #232a34;
+    border: 1px solid #e9ecf3;
   }
   #about p, #analysis p {
-    color:#e6e6e6;
+    color:#22223b;
     font-size:1.1rem;
   }
   footer {
-    background:#232a34;
-    color:#ffd700;
+    background:#4f5bd5;
+    color:#fff;
     text-align:center;
     padding:1rem 0;
     margin-top:2rem;
     border-radius:0 0 16px 16px;
-    border-top: 2px solid #ffd700;
+    border-top: 2px solid #6a82fb;
     font-family: 'Roboto Condensed', 'Open Sans', Arial, sans-serif;
     font-size:1rem;
   }
@@ -230,12 +230,12 @@
     color: inherit !important;
   }
   #carousel-content .price-up {
-    color: #00ff00 !important;
-    text-shadow: 0 0 4px #00ff00;
+    color: #00c853 !important;
+    text-shadow: 0 0 4px #00c853;
   }
   #carousel-content .price-down {
-    color: #ff2e2e !important;
-    text-shadow: 0 0 4px #ff2e2e;
+    color: #d50000 !important;
+    text-shadow: 0 0 4px #d50000;
   }
   /* Glassy effect for cards */
   main, #media-gallery > div, #forex-news-list {
@@ -286,7 +286,7 @@
   </style>
 
   <!-- Navigation Menu -->
-  <nav style="background:#fff; box-shadow:0 2px 8px rgba(30,60,114,0.08); display:flex; justify-content:center; gap:2rem; padding:1rem 0; font-size:1.1rem;">
+  <nav style="background:#fff; box-shadow:0 2px 8px rgba(79,91,213,0.08); display:flex; justify-content:center; gap:2rem; padding:1rem 0; font-size:1.1rem;">
     <a href="#home" style="color:#1e3c72; text-decoration:none; font-weight:600;">Home</a>
     <a href="#analysis" style="color:#1e3c72; text-decoration:none; font-weight:600;">Analysis</a>
     <a href="#gallery" style="color:#1e3c72; text-decoration:none; font-weight:600;">Gallery</a>
@@ -294,7 +294,7 @@
   </nav>
 
   <!-- Main Content -->
-  <main style="max-width:900px; margin:2rem auto; background:#fff; border-radius:16px; box-shadow:0 4px 24px rgba(30,60,114,0.10); padding:2rem;">
+  <main style="max-width:900px; margin:2rem auto; background:#fff; border-radius:16px; box-shadow:0 4px 24px rgba(79,91,213,0.10); padding:2rem;">
     <section id="analysis">
       <h2 style="color:#2a5298;">Latest Market Analysis</h2>
       <p style="color:#333;">Here you'll find speculative insights and commentary on Nasdaq and ES. <strong>This is not trading advice.</strong> All content is for educational and entertainment purposes only.</p>
