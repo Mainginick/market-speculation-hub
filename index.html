@@ -1,66 +1,72 @@
 <!DOCTYPE html><html lang="en-US"><head><style>
   body {
-    background: linear-gradient(135deg, #f5f7fa 0%, #e9ecf3 100%);
-    font-family: 'Open Sans', 'Roboto', Arial, sans-serif;
+    background: #13151a;
+    font-family: 'Helvetica Neue', 'Arial', 'Open Sans', sans-serif;
     margin:0;
-    color: #22223b;
+    color: #f5f6fa;
   }
   header {
-    background: linear-gradient(90deg, #4f5bd5 0%, #6a82fb 100%);
+    background: #191b1f;
     color: #fff;
-    padding: 2rem 0;
-    text-align: center;
-    box-shadow: 0 2px 8px rgba(79,91,213,0.15);
-    border-bottom: 2px solid #6a82fb;
+    padding: 2rem 0 1rem 0;
+    text-align: left;
+    box-shadow: 0 2px 8px rgba(0,0,0,0.18);
+    border-bottom: 2px solid #6a1b9a;
+    display: flex;
+    align-items: center;
+    justify-content: flex-start;
+    gap: 2rem;
   }
   header h1 {
-    font-size:3rem;
-    margin:0;
-    letter-spacing:-2px;
-    font-family: 'Roboto Condensed', 'Open Sans', Arial, sans-serif;
+    font-size:2.4rem;
+    margin:0 2rem 0 2rem;
+    letter-spacing:-1px;
+    font-family: 'Helvetica Neue', 'Arial', 'Open Sans', sans-serif;
     font-weight: 700;
     color: #fff;
-    text-shadow: 0 2px 8px #6a82fb;
+    text-shadow: 0 2px 8px #191b1f;
   }
   header p {
-    font-size:1.2rem;
+    font-size:1.1rem;
     margin-top:0.5rem;
-    color: #e9ecf3;
+    color: #bdbdbd;
+    font-weight: 500;
   }
   #live-carousel {
-    background: linear-gradient(90deg, #6a82fb 0%, #4f5bd5 100%);
+    background: #191b1f;
     color: #fff;
     font-size:1.1rem;
     font-weight:600;
     padding:0.7rem 0;
     overflow:hidden;
     position:relative;
-    border-bottom: 1px solid #4f5bd5;
+    border-bottom: 1px solid #6a1b9a;
   }
   #carousel-content span {
     font-family: 'Roboto Mono', 'Consolas', monospace;
     margin-right:2.5rem;
     font-size:1.05rem;
-    background:rgba(106,130,251,0.08);
+    background:rgba(34,36,41,0.7);
     border-radius:6px;
     padding:0.3rem 1rem;
-    box-shadow:0 1px 4px rgba(79,91,213,0.08);
+    box-shadow:0 1px 4px rgba(0,0,0,0.12);
+    color: #fff;
   }
   #carousel-content span span {
     font-weight:700;
   }
   nav {
-    background:#fff;
-    box-shadow:0 2px 8px rgba(79,91,213,0.10);
+    background:#191b1f;
+    box-shadow:0 2px 8px rgba(0,0,0,0.18);
     display:flex;
-    justify-content:center;
+    justify-content:flex-start;
     gap:2rem;
-    padding:1rem 0;
+    padding:1rem 2rem;
     font-size:1.1rem;
-    border-bottom: 1px solid #6a82fb;
+    border-bottom: 1px solid #6a1b9a;
   }
   nav a {
-    color:#4f5bd5;
+    color:#fff;
     text-decoration:none;
     font-weight:600;
     padding:0.5rem 1.2rem;
@@ -68,50 +74,50 @@
     transition: background 0.2s, color 0.2s;
   }
   nav a:hover {
-    background: #e9ecf3;
-    color: #6a82fb;
+    background: #6a1b9a;
+    color: #fff;
   }
   main {
     max-width:900px;
     margin:2rem auto;
-    background:#fff;
+    background:#191b1f;
     border-radius:16px;
-    box-shadow:0 4px 24px rgba(79,91,213,0.10);
+    box-shadow:0 4px 24px rgba(0,0,0,0.18);
     padding:2rem;
-    border: 1px solid #e9ecf3;
+    border: 1px solid #23242a;
   }
   section h2 {
-    color:#4f5bd5;
-    font-family: 'Roboto Condensed', 'Open Sans', Arial, sans-serif;
+    color:#6a1b9a;
+    font-family: 'Helvetica Neue', 'Arial', 'Open Sans', sans-serif;
     font-size:2rem;
     margin-bottom:0.7rem;
     font-weight:700;
     letter-spacing:-1px;
   }
   #gallery h2, #comments h2, #forex-news h2, #about h2 {
-    color:#6a82fb;
+    color:#6a1b9a;
   }
   #admin-upload-form {
     margin-bottom:1.5rem;
-    background:#e9ecf3;
+    background:#23242a;
     padding:1rem;
     border-radius:8px;
-    box-shadow:0 2px 8px rgba(79,91,213,0.08);
-    border: 1px solid #6a82fb;
+    box-shadow:0 2px 8px rgba(0,0,0,0.12);
+    border: 1px solid #6a1b9a;
   }
   #admin-upload-form label {
-    color:#4f5bd5;
+    color:#6a1b9a;
     font-weight:600;
   }
   #admin-upload-form input[type="file"] {
-    background:#fff;
-    color:#4f5bd5;
-    border:1px solid #6a82fb;
+    background:#191b1f;
+    color:#fff;
+    border:1px solid #6a1b9a;
     border-radius:4px;
     padding:0.3rem;
   }
   #admin-upload-form button {
-    background:#6a82fb;
+    background:#6a1b9a;
     color:#fff;
     border:none;
     padding:0.5rem 1.5rem;
@@ -122,8 +128,8 @@
     transition: background 0.2s;
   }
   #admin-upload-form button:hover {
-    background:#4f5bd5;
-    color:#fff;
+    background:#fff;
+    color:#6a1b9a;
   }
   #media-gallery {
     display:grid;
@@ -131,19 +137,19 @@
     gap:1rem;
   }
   #media-gallery > div {
-    background:#e9ecf3;
+    background:#23242a;
     border-radius:8px;
-    color:#4f5bd5;
+    color:#fff;
     font-size:1.2rem;
-    box-shadow:0 2px 8px rgba(79,91,213,0.08);
-    border: 1px solid #6a82fb;
+    box-shadow:0 2px 8px rgba(0,0,0,0.12);
+    border: 1px solid #6a1b9a;
     padding:0.5rem;
   }
   #media-gallery img, #media-gallery video {
     border-radius:8px;
-    box-shadow:0 2px 8px rgba(79,91,213,0.10);
-    border: 1px solid #6a82fb;
-    background: #fff;
+    box-shadow:0 2px 8px rgba(0,0,0,0.18);
+    border: 1px solid #6a1b9a;
+    background: #191b1f;
   }
   #media-gallery button {
     background: #e74c3c;
@@ -153,7 +159,7 @@
     padding: 0.3rem 0.8rem;
     cursor: pointer;
     font-weight:700;
-    box-shadow:0 1px 4px rgba(79,91,213,0.08);
+    box-shadow:0 1px 4px rgba(0,0,0,0.12);
   }
   #comments {
     margin-top:2rem;
@@ -161,14 +167,14 @@
   #comment-form textarea {
     width:100%;
     border-radius:8px;
-    border:1px solid #6a82fb;
+    border:1px solid #6a1b9a;
     padding:0.5rem;
     font-size:1rem;
-    background:#fff;
-    color:#4f5bd5;
+    background:#191b1f;
+    color:#fff;
   }
   #comment-form button {
-    background:#6a82fb;
+    background:#6a1b9a;
     color:#fff;
     border:none;
     padding:0.5rem 1.5rem;
@@ -180,49 +186,49 @@
     transition: background 0.2s;
   }
   #comment-form button:hover {
-    background:#4f5bd5;
-    color:#fff;
+    background:#fff;
+    color:#6a1b9a;
   }
   #comment-list li {
-    background: #e9ecf3;
-    color: #4f5bd5;
+    background: #23242a;
+    color: #fff;
     margin-bottom: 0.5rem;
     padding: 0.5rem 1rem;
     border-radius: 8px;
-    border: 1px solid #6a82fb;
+    border: 1px solid #6a1b9a;
     font-family: 'Roboto Mono', 'Consolas', monospace;
   }
   #forex-news-list {
-    background:#e9ecf3;
+    background:#23242a;
     border-radius:12px;
-    box-shadow:0 2px 8px rgba(79,91,213,0.10);
+    box-shadow:0 2px 8px rgba(0,0,0,0.14);
     padding:1.5rem;
-    border: 1px solid #6a82fb;
+    border: 1px solid #6a1b9a;
   }
   #forex-news-list div {
-    background:#fff;
-    color:#4f5bd5;
+    background:#191b1f;
+    color:#fff;
     margin-bottom:0.7rem;
     padding:0.7rem 1rem;
     border-radius:8px;
     font-size:1.05rem;
-    box-shadow:0 1px 4px rgba(79,91,213,0.06);
+    box-shadow:0 1px 4px rgba(0,0,0,0.10);
     font-family: 'Roboto Mono', 'Consolas', monospace;
-    border: 1px solid #e9ecf3;
+    border: 1px solid #23242a;
   }
   #about p, #analysis p {
-    color:#22223b;
+    color:#bdbdbd;
     font-size:1.1rem;
   }
   footer {
-    background:#4f5bd5;
+    background:#191b1f;
     color:#fff;
     text-align:center;
     padding:1rem 0;
     margin-top:2rem;
     border-radius:0 0 16px 16px;
-    border-top: 2px solid #6a82fb;
-    font-family: 'Roboto Condensed', 'Open Sans', Arial, sans-serif;
+    border-top: 2px solid #6a1b9a;
+    font-family: 'Helvetica Neue', 'Arial', 'Open Sans', sans-serif;
     font-size:1rem;
   }
   /* Neon green/red for price changes */
@@ -230,12 +236,12 @@
     color: inherit !important;
   }
   #carousel-content .price-up {
-    color: #00c853 !important;
-    text-shadow: 0 0 4px #00c853;
+    color: #00ff00 !important;
+    text-shadow: 0 0 4px #00ff00;
   }
   #carousel-content .price-down {
-    color: #d50000 !important;
-    text-shadow: 0 0 4px #d50000;
+    color: #ff2e2e !important;
+    text-shadow: 0 0 4px #ff2e2e;
   }
   /* Glassy effect for cards */
   main, #media-gallery > div, #forex-news-list {
@@ -275,7 +281,11 @@
   </header>
 
   <!-- Dynamic Live Feed Carousel Banner -->
-  <div id="live-carousel" style="background: linear-gradient(90deg, #2a5298 0%, #1e3c72 100%); color: #fff; font-size:1.1rem; font-weight:600; padding:0.7rem 0; overflow:hidden; position:relative;">
+  <div id="live-carousel">
+    <div style="margin-bottom:1rem; text-align:center;">
+      <span style="font-size:1.2rem; font-weight:700; color:#6a1b9a; background:#23242a; padding:0.5rem 1.5rem; border-radius:8px; display:inline-block; margin-bottom:0.5rem;">LIVE</span><br>
+      <iframe width="560" height="315" src="https://www.youtube.com/embed/MZ46gxsJlUw?si=dqj5UDIsmoRyUVqS&amp;autoplay=1" title="YouTube live stream" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.18); margin-bottom:1rem;"></iframe>
+    </div>
     <div id="carousel-content" style="white-space:nowrap; display:inline-block; animation: moveBanner 30s linear infinite;"></div>
   </div>
   <style>
@@ -286,25 +296,25 @@
   </style>
 
   <!-- Navigation Menu -->
-  <nav style="background:#fff; box-shadow:0 2px 8px rgba(79,91,213,0.08); display:flex; justify-content:center; gap:2rem; padding:1rem 0; font-size:1.1rem;">
-    <a href="#home" style="color:#1e3c72; text-decoration:none; font-weight:600;">Home</a>
-    <a href="#analysis" style="color:#1e3c72; text-decoration:none; font-weight:600;">Analysis</a>
-    <a href="#gallery" style="color:#1e3c72; text-decoration:none; font-weight:600;">Gallery</a>
-    <a href="#about" style="color:#1e3c72; text-decoration:none; font-weight:600;">About</a>
+  <nav style="background:#191b1f; box-shadow:0 2px 8px rgba(0,0,0,0.18); display:flex; justify-content:flex-start; gap:2rem; padding:1rem 2rem; font-size:1.1rem;">
+    <a href="#home" style="color:#fff; text-decoration:none; font-weight:600;">Home</a>
+    <a href="#analysis" style="color:#fff; text-decoration:none; font-weight:600;">Analysis</a>
+    <a href="#gallery" style="color:#fff; text-decoration:none; font-weight:600;">Gallery</a>
+    <a href="#about" style="color:#fff; text-decoration:none; font-weight:600;">About</a>
   </nav>
 
   <!-- Main Content -->
-  <main style="max-width:900px; margin:2rem auto; background:#fff; border-radius:16px; box-shadow:0 4px 24px rgba(79,91,213,0.10); padding:2rem;">
+  <main style="max-width:900px; margin:2rem auto; background:#191b1f; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.18); padding:2rem;">
     <section id="analysis">
-      <h2 style="color:#2a5298;">Latest Market Analysis</h2>
-      <p style="color:#333;">Here you'll find speculative insights and commentary on Nasdaq and ES. <strong>This is not trading advice.</strong> All content is for educational and entertainment purposes only.</p>
+      <h2 style="color:#6a1b9a;">Latest Market Analysis</h2>
+      <p style="color:#f5f6fa;">Here you'll find speculative insights and commentary on Nasdaq and ES. <strong>This is not trading advice.</strong> All content is for educational and entertainment purposes only.</p>
     </section>
     <section id="gallery" style="margin-top:2rem;">
-      <h2 style="color:#2a5298;">Admin Gallery: Pictures & Videos</h2>
-      <form id="admin-upload-form" style="margin-bottom:1.5rem; background:#f7faff; padding:1rem; border-radius:8px; box-shadow:0 2px 8px rgba(30,60,114,0.05);">
-        <label for="admin-upload" style="display:block; margin-bottom:0.5rem; color:#1e3c72; font-weight:600;">Add Analysis Media (Admin Only):</label>
+      <h2 style="color:#6a1b9a;">Admin Gallery: Pictures & Videos</h2>
+      <form id="admin-upload-form" style="margin-bottom:1.5rem; background:#23242a; padding:1rem; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.12);">
+        <label for="admin-upload" style="display:block; margin-bottom:0.5rem; color:#6a1b9a; font-weight:600;">Add Analysis Media (Admin Only):</label>
         <input type="file" id="admin-upload" name="admin-upload" accept="image/*,video/*" multiple style="margin-bottom:0.5rem;">
-        <button type="submit" style="background:#2a5298; color:#fff; border:none; padding:0.5rem 1.5rem; border-radius:4px; font-size:1rem; cursor:pointer;">Upload</button>
+        <button type="submit" style="background:#6a1b9a; color:#fff; border:none; padding:0.5rem 1.5rem; border-radius:4px; font-size:1rem; cursor:pointer;">Upload</button>
       </form>
       <div id="media-gallery" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem;">
         <!-- Admin uploaded images/videos will appear here -->
@@ -314,10 +324,10 @@
       </div>
       <!-- Comment Section -->
       <section id="comments" style="margin-top:2rem;">
-        <h2 style="color:#2a5298;">Comments</h2>
+        <h2 style="color:#6a1b9a;">Comments</h2>
         <form id="comment-form" style="margin-bottom:1rem;">
-          <textarea id="comment-input" rows="3" style="width:100%; border-radius:8px; border:1px solid #2a5298; padding:0.5rem; font-size:1rem;" placeholder="Add your comment..."></textarea>
-          <button type="submit" style="background:#2a5298; color:#fff; border:none; padding:0.5rem 1.5rem; border-radius:4px; font-size:1rem; cursor:pointer; margin-top:0.5rem;">Post Comment</button>
+          <textarea id="comment-input" rows="3" style="width:100%; border-radius:8px; border:1px solid #6a1b9a; padding:0.5rem; font-size:1rem;" placeholder="Add your comment..."></textarea>
+          <button type="submit" style="background:#6a1b9a; color:#fff; border:none; padding:0.5rem 1.5rem; border-radius:4px; font-size:1rem; cursor:pointer; margin-top:0.5rem;">Post Comment</button>
         </form>
         <ul id="comment-list" style="list-style:none; padding:0; margin:0;"></ul>
       </section>
@@ -466,8 +476,8 @@
       </script>
     </section>
     <section id="forex-news" style="margin-top:2rem;">
-      <h2 style="color:#2a5298;">Forex News (Mirrored from Forex Factory)</h2>
-      <div id="forex-news-list" style="background:#f3f7fa; border-radius:12px; box-shadow:0 2px 8px rgba(30,60,114,0.07); padding:1.5rem;">
+      <h2 style="color:#6a1b9a;">Forex News (Mirrored from Forex Factory)</h2>
+      <div id="forex-news-list" style="background:#23242a; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.14); padding:1.5rem;">
         <div style="color:#888; text-align:center;">Loading latest news...</div>
       </div>
     </section>
@@ -500,13 +510,13 @@
       setInterval(updateForexNews, 3600000); // Refresh every hour
     </script>
     <section id="about" style="margin-top:2rem;">
-      <h2 style="color:#2a5298;">About This Site</h2>
-      <p style="color:#333;">This website is dedicated to market speculation and analysis for Nasdaq and ES. All opinions are personal and for informational purposes only. <strong>Nothing here should be considered trading advice.</strong></p>
+      <h2 style="color:#6a1b9a;">About This Site</h2>
+      <p style="color:#f5f6fa;">This website is dedicated to market speculation and analysis for Nasdaq and ES. All opinions are personal and for informational purposes only. <strong>Nothing here should be considered trading advice.</strong></p>
     </section>
   </main>
 
   <!-- Footer -->
-  <footer style="background:#1e3c72; color:#ffd700; text-align:center; padding:1rem 0; margin-top:2rem; border-radius:0 0 16px 16px;">
+  <footer style="background:#191b1f; color:#fff; text-align:center; padding:1rem 0; margin-top:2rem; border-radius:0 0 16px 16px;">
     &copy; 2025 Market Speculation Hub. All rights reserved.
   </footer>
 </body>
