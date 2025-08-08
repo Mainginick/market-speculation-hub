@@ -479,44 +479,49 @@
       </script>
     </section>
     <section id="forex-news" style="margin-top:2rem;">
-      <h2 style="color:#6a1b9a;">Forex News (Mirrored from Forex Factory)</h2>
+      <h2 style="color:#6a1b9a;">Economic Headlines</h2>
       <div id="forex-news-list" style="background:#23242a; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.14); padding:1.5rem;">
         <div style="color:#888; text-align:center;">Loading latest news...</div>
       </div>
     </section>
     <script>
-      // Forex Factory News Mirroring (using RSS feed via rss2json)
-      async function fetchForexNews() {
-        try {
-          const rssUrl = 'https://www.forexfactory.com/rss.php';
-          const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
-          const res = await fetch(apiUrl);
-          const data = await res.json();
-          if (!data.items || !data.items.length) return ['No news available.'];
-          return data.items.slice(0, 10).map(item => item.title);
-        } catch (e) {
-          return ['Unable to load news.'];
-        }
+      // Economic News Aggregator (multiple sources, no source shown)
+      async function fetchEconomicNews() {
+        const feeds = [
+          'https://www.reuters.com/rssFeed/economyNews',
+          'https://www.cnbc.com/id/10001147/device/rss/rss.html',
+          'https://www.investing.com/rss/news_25.rss',
+          'https://feeds.a.dj.com/rss/RSSMarketsMain.xml',
+          'https://www.ft.com/?format=rss',
+        ];
+        let headlines = [];
+        await Promise.all(feeds.map(async url => {
+          try {
+            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
+            const res = await fetch(apiUrl);
+            const data = await res.json();
+            if (data.items && data.items.length) {
+              headlines = headlines.concat(data.items.slice(0, 3).map(item => item.title));
+            }
+          } catch (e) {
+            // Ignore errors for individual feeds
+          }
+        }));
+        return headlines.length ? headlines.slice(0, 10) : ['No news available.'];
       }
-      async function updateForexNews() {
+      async function updateEconomicNews() {
         const newsList = document.getElementById('forex-news-list');
-        const headlines = await fetchForexNews();
+        const headlines = await fetchEconomicNews();
         newsList.innerHTML = headlines.map(h =>
           `<div style='background:#191b1f; color:#6a1b9a; margin-bottom:0.7rem; padding:0.7rem 1rem; border-radius:8px; font-size:1.05rem; box-shadow:0 1px 4px rgba(0,0,0,0.10);'>${h}</div>`
         ).join('');
       }
-      updateForexNews();
-      setInterval(updateForexNews, 3600000); // Refresh every hour
+      updateEconomicNews();
+      setInterval(updateEconomicNews, 3600000); // Refresh every hour
     </script>
-    <section id="about" style="margin-top:2rem;">
-      <h2 style="color:#6a1b9a;">About This Site</h2>
-      <p style="color:#f5f6fa;">This website is dedicated to market speculation and analysis for Nasdaq and ES. All opinions are personal and for informational purposes only. <strong>Nothing here should be considered trading advice.</strong></p>
-    </section>
   </main>
-
-  <!-- Footer -->
-  <footer style="background:#191b1f; color:#fff; text-align:center; padding:1rem 0; margin-top:2rem; border-radius:0 0 16px 16px;">
-    &copy; 2025 Market Speculation Hub. All rights reserved.
+  <footer>
+    <p style="margin:0;">&copy; 2023 Market Speculation Hub. All rights reserved.</p>
   </footer>
 </body>
 </html>
