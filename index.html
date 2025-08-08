@@ -307,6 +307,7 @@
     <a href="#home" style="color:#222; text-decoration:none; font-weight:600;">Home</a>
     <a href="#analysis" style="color:#222; text-decoration:none; font-weight:600;">Analysis</a>
     <a href="#gallery" style="color:#222; text-decoration:none; font-weight:600;">Gallery</a>
+    <a href="#news" style="color:#222; text-decoration:none; font-weight:600;">News</a>
     <a href="#about" style="color:#222; text-decoration:none; font-weight:600;">About</a>
   </nav>
 
@@ -482,19 +483,35 @@
         setInterval(refreshMarketFeed, 60000); // Refresh every minute
       </script>
     </section>
-    <section id="forex-news" style="margin-top:2rem;">
-      <h2 style="color:#6a1b9a;">Economic Headlines (USD & GBP)</h2>
-      <div id="forex-news-list" style="background:#f7f8fa; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:1.5rem;">
-        <div style="color:#888; text-align:center;">Loading latest news...</div>
-      </div>
-    </section>
-    <section id="trump-news" style="margin-top:2rem;">
-      <h2 style="color:#6a1b9a;">Trump News</h2>
-      <div id="trump-news-list" style="background:#f7f8fa; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:1.5rem;">
-        <div style="color:#888; text-align:center;">Loading Trump news...</div>
-      </div>
+    <section id="news" style="margin-top:2rem; display:none;">
+      <h2 style="color:#6a1b9a;">News</h2>
+      <section id="forex-news">
+        <h3 style="color:#6a1b9a;">Economic Headlines (USD & GBP)</h3>
+        <div id="forex-news-list" style="background:#f7f8fa; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:1.5rem;">
+          <div style="color:#888; text-align:center;">Loading latest news...</div>
+        </div>
+      </section>
+      <section id="trump-news" style="margin-top:2rem;">
+        <h3 style="color:#6a1b9a;">Trump News</h3>
+        <div id="trump-news-list" style="background:#f7f8fa; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:1.5rem;">
+          <div style="color:#888; text-align:center;">Loading Trump news...</div>
+        </div>
+      </section>
     </section>
     <script>
+      // News page logic: show/hide sections
+      function showSection(id) {
+        document.querySelectorAll('main > section').forEach(sec => sec.style.display = 'none');
+        const el = document.getElementById(id);
+        if (el) el.style.display = '';
+      }
+      window.addEventListener('hashchange', function() {
+        const hash = location.hash.replace('#', '') || 'analysis';
+        showSection(hash);
+      });
+      // Show default section
+      showSection((location.hash.replace('#', '') || 'analysis'));
+
       // Economic News Aggregator (USD & GBP only)
       async function fetchEconomicNews() {
         const feeds = [
@@ -526,6 +543,7 @@
       }
       async function updateEconomicNews() {
         const newsList = document.getElementById('forex-news-list');
+        if (!newsList) return;
         const headlines = await fetchEconomicNews();
         newsList.innerHTML = headlines.map(h =>
           `<div style='background:#191b1f; color:#6a1b9a; margin-bottom:0.7rem; padding:0.7rem 1rem; border-radius:8px; font-size:1.05rem; box-shadow:0 1px 4px rgba(0,0,0,0.10);'>${h}</div>`
@@ -565,6 +583,7 @@
       }
       async function updateTrumpNews() {
         const newsList = document.getElementById('trump-news-list');
+        if (!newsList) return;
         const headlines = await fetchTrumpNews();
         newsList.innerHTML = headlines.map(h =>
           `<div style='background:#191b1f; color:#ffd700; margin-bottom:0.7rem; padding:0.7rem 1rem; border-radius:8px; font-size:1.05rem; box-shadow:0 1px 4px rgba(0,0,0,0.10);'>${h}</div>`
