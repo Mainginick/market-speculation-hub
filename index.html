@@ -485,19 +485,15 @@
       </div>
     </section>
     <script>
-      // Forex Factory News Mirroring
+      // Forex Factory News Mirroring (using RSS feed via rss2json)
       async function fetchForexNews() {
         try {
-          const res = await fetch('https://www.forexfactory.com/');
-          const text = await res.text();
-          // Parse headlines using regex (simple extraction)
-          const headlineRegex = /<a[^>]*class="title"[^>]*>(.*?)<\/a>/g;
-          let headlines = [];
-          let match;
-          while ((match = headlineRegex.exec(text)) !== null) {
-            headlines.push(match[1]);
-          }
-          return headlines.slice(0, 10); // Show top 10
+          const rssUrl = 'https://www.forexfactory.com/rss.php';
+          const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(rssUrl)}`;
+          const res = await fetch(apiUrl);
+          const data = await res.json();
+          if (!data.items || !data.items.length) return ['No news available.'];
+          return data.items.slice(0, 10).map(item => item.title);
         } catch (e) {
           return ['Unable to load news.'];
         }
@@ -506,7 +502,7 @@
         const newsList = document.getElementById('forex-news-list');
         const headlines = await fetchForexNews();
         newsList.innerHTML = headlines.map(h =>
-          `<div style='background:#e0eafc; color:#2a5298; margin-bottom:0.7rem; padding:0.7rem 1rem; border-radius:8px; font-size:1.05rem; box-shadow:0 1px 4px rgba(30,60,114,0.04);'>${h}</div>`
+          `<div style='background:#191b1f; color:#6a1b9a; margin-bottom:0.7rem; padding:0.7rem 1rem; border-radius:8px; font-size:1.05rem; box-shadow:0 1px 4px rgba(0,0,0,0.10);'>${h}</div>`
         ).join('');
       }
       updateForexNews();
