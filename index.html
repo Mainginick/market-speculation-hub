@@ -1,41 +1,7 @@
 """
-Market Speculation Hub - Message & Admin Backend (Pure Python Flask)
+Market Speculation Hub - Bloomberg-style frontend + backend
 
---------------------------------------------------------------
-How to deploy and run this app:
-
-1) Install dependencies:
-   pip install flask
-
-2) Set environment variables before running the app:
-
-   On Linux/macOS (bash):
-     export ADMIN_USERNAME=youradminusername
-     export ADMIN_PASSWORD=yourstrongpassword
-     export ICLOUD_EMAIL=nickmaingi06@icloud.com
-     export ICLOUD_APP_PASSWORD=your-app-specific-password
-
-   On Windows (PowerShell):
-     setx ADMIN_USERNAME youradminusername
-     setx ADMIN_PASSWORD yourstrongpassword
-     setx ICLOUD_EMAIL nickmaingi06@icloud.com
-     setx ICLOUD_APP_PASSWORD your-app-specific-password
-
-3) Run the app:
-   python app.py
-
-4) Open your browser:
-   - Contact form: http://localhost:8000/
-   - Admin panel (login required): http://localhost:8000/admin
-
---------------------------------------------------------------
-Notes:
-
-- This app stores messages locally in 'messages.db' SQLite database file.
-- Sends email via iCloud SMTP using provided credentials.
-- Admin panel protected with HTTP Basic Authentication.
-- No JavaScript needed anywhere; pure HTML rendering.
-- For production, use HTTPS and secure environment variables.
+Instructions same as before (see previous comments).
 """
 
 from flask import Flask, request, redirect, url_for, Response
@@ -50,13 +16,11 @@ from datetime import datetime
 app = Flask(__name__)
 DATABASE = 'messages.db'
 
-# Fetch credentials from environment variables
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'password')
 ICLOUD_EMAIL = os.getenv('ICLOUD_EMAIL', 'nickmaingi06@icloud.com')
 ICLOUD_APP_PASSWORD = os.getenv('ICLOUD_APP_PASSWORD', '')
 
-# Initialize SQLite DB for messages
 def init_db():
     with sqlite3.connect(DATABASE) as conn:
         conn.execute('''
@@ -71,7 +35,6 @@ def init_db():
 
 init_db()
 
-# Basic Auth helper functions
 def check_auth(username, password):
     return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
 
@@ -89,42 +52,174 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-# Escape HTML to prevent XSS
 def esc(s):
     return (s or '').replace('&', '&amp;').replace('<','&lt;').replace('>','&gt;').replace('"','&quot;').replace("'", '&#39;')
 
-# Routes
-
 @app.route('/', methods=['GET'])
 def index():
-    # Contact form page (pure HTML, no JS)
     return '''
 <!doctype html>
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Message the Creator</title>
+  <title>Market Speculation Hub</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; }
-    label { display: block; margin-top: 1rem; }
-    input, textarea { width: 100%; padding: 0.5rem; }
-    button { margin-top: 1rem; padding: 0.7rem 1.2rem; background-color: teal; color: white; border: none; cursor: pointer; }
+    /* Reset & base */
+    * {
+      box-sizing: border-box;
+      margin: 0; padding: 0;
+    }
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: #0f1113;
+      color: #f1f1f1;
+      line-height: 1.6;
+      min-height: 100vh;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      padding: 0 1rem 3rem;
+    }
+    header {
+      background-color: #161b22;
+      width: 100%;
+      max-width: 1200px;
+      padding: 1rem 2rem;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      border-bottom: 2px solid #d3a518; /* Bloomberg gold */
+      box-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      position: sticky;
+      top: 0;
+      z-index: 10;
+    }
+    header h1 {
+      font-weight: 700;
+      font-size: 1.5rem;
+      color: #d3a518;
+      letter-spacing: 0.1em;
+      user-select: none;
+    }
+    nav a {
+      color: #d3a518;
+      text-decoration: none;
+      font-weight: 600;
+      margin-left: 1.5rem;
+      transition: color 0.3s ease;
+      user-select: none;
+    }
+    nav a:hover {
+      color: #f5c518;
+    }
+
+    main {
+      max-width: 600px;
+      width: 100%;
+      margin-top: 3rem;
+      background-color: #1e2227;
+      padding: 2rem 3rem;
+      border-radius: 6px;
+      box-shadow: 0 0 20px #d3a518aa;
+    }
+    main h2 {
+      font-weight: 700;
+      font-size: 2rem;
+      margin-bottom: 1rem;
+      color: #f5c518;
+      letter-spacing: 0.07em;
+      text-align: center;
+    }
+    form label {
+      display: block;
+      margin: 1.3rem 0 0.5rem;
+      font-weight: 600;
+      font-size: 0.95rem;
+      color: #e0c654;
+    }
+    input[type="text"],
+    input[type="email"],
+    textarea {
+      width: 100%;
+      padding: 0.7rem 1rem;
+      border-radius: 4px;
+      border: none;
+      background-color: #2b2f36;
+      color: #f1f1f1;
+      font-size: 1rem;
+      resize: vertical;
+      box-shadow: inset 0 0 6px #111;
+      transition: background-color 0.3s ease;
+      font-family: inherit;
+    }
+    input[type="text"]:focus,
+    input[type="email"]:focus,
+    textarea:focus {
+      outline: none;
+      background-color: #3b414b;
+      box-shadow: 0 0 8px #d3a518;
+    }
+    button[type="submit"] {
+      margin-top: 2rem;
+      width: 100%;
+      background-color: #d3a518;
+      border: none;
+      color: #161b22;
+      font-weight: 700;
+      font-size: 1.1rem;
+      padding: 0.9rem;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      letter-spacing: 0.07em;
+    }
+    button[type="submit"]:hover {
+      background-color: #f5c518;
+    }
+    footer {
+      margin-top: auto;
+      padding: 1rem 0;
+      color: #777;
+      font-size: 0.9rem;
+      user-select: none;
+    }
+    @media (max-width: 480px) {
+      main {
+        padding: 1.5rem 2rem;
+      }
+      header {
+        padding: 1rem;
+      }
+    }
   </style>
 </head>
 <body>
-  <h1>Message the Creator</h1>
-  <form action="/send" method="post">
-    <label for="name">Your Name</label>
-    <input id="name" name="name" required maxlength="100" />
+  <header>
+    <h1>MARKET SPECULATION HUB</h1>
+    <nav>
+      <a href="/">Home</a>
+      <a href="/admin">Admin</a>
+    </nav>
+  </header>
+  <main>
+    <h2>Message the Creator</h2>
+    <form action="/send" method="post" autocomplete="off" novalidate>
+      <label for="name">Your Name</label>
+      <input id="name" name="name" type="text" maxlength="100" required placeholder="John Doe" />
 
-    <label for="email">Your Email</label>
-    <input id="email" type="email" name="email" required maxlength="254" />
+      <label for="email">Your Email</label>
+      <input id="email" name="email" type="email" maxlength="254" required placeholder="john@example.com" />
 
-    <label for="message">Message</label>
-    <textarea id="message" name="message" rows="6" required maxlength="5000"></textarea>
+      <label for="message">Message</label>
+      <textarea id="message" name="message" rows="6" maxlength="5000" required placeholder="Write your message here..."></textarea>
 
-    <button type="submit">Send</button>
-  </form>
+      <button type="submit">Send Message</button>
+    </form>
+  </main>
+  <footer>
+    &copy; 2025 Market Speculation Hub
+  </footer>
 </body>
 </html>
 '''
@@ -140,14 +235,12 @@ def send_message():
 
     timestamp = datetime.utcnow().isoformat()
 
-    # Store message in SQLite DB
     with sqlite3.connect(DATABASE) as conn:
         conn.execute(
             "INSERT INTO messages (name, email, message, timestamp) VALUES (?, ?, ?, ?)",
             (name, email, message, timestamp)
         )
 
-    # Send email via iCloud SMTP
     try:
         smtp_host = "smtp.mail.me.com"
         smtp_port = 587
@@ -177,12 +270,48 @@ def thank_you():
 <head>
   <meta charset="utf-8" />
   <title>Thanks!</title>
-  <style>body { font-family: Arial,sans-serif; max-width:600px; margin:2rem auto; text-align:center; }</style>
+  <style>
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: #0f1113;
+      color: #f1f1f1;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+      margin: 0;
+    }
+    main {
+      background-color: #1e2227;
+      padding: 3rem 4rem;
+      border-radius: 8px;
+      box-shadow: 0 0 25px #d3a518cc;
+      max-width: 500px;
+      text-align: center;
+    }
+    h1 {
+      color: #d3a518;
+      margin-bottom: 1rem;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+    }
+    a {
+      color: #f5c518;
+      text-decoration: none;
+      font-weight: 700;
+    }
+    a:hover {
+      text-decoration: underline;
+    }
+  </style>
 </head>
 <body>
-  <h1>Thank you!</h1>
-  <p>Your message was received and emailed to the creator.</p>
-  <p><a href="/">Back to site</a></p>
+  <main>
+    <h1>Thank you!</h1>
+    <p>Your message was received and emailed to the creator.</p>
+    <p><a href="/">Back to Home</a></p>
+  </main>
 </body>
 </html>
 '''
@@ -194,7 +323,6 @@ def admin_panel():
         cursor = conn.execute("SELECT id, name, email, message, timestamp FROM messages ORDER BY timestamp DESC LIMIT 100")
         messages = cursor.fetchall()
 
-    # Render messages in a table (no JS)
     html = '''
 <!doctype html>
 <html lang="en">
@@ -202,11 +330,53 @@ def admin_panel():
   <meta charset="utf-8" />
   <title>Admin Panel - Messages</title>
   <style>
-    body { font-family: Arial,sans-serif; max-width: 900px; margin: 2rem auto; }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { border: 1px solid #ccc; padding: 0.5rem; vertical-align: top; }
-    th { background: teal; color: white; }
-    textarea { width: 100%; height: 80px; resize: none; border:none; background:#f9f9f9; }
+    body {
+      font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
+      background-color: #0f1113;
+      color: #f1f1f1;
+      margin: 2rem auto;
+      max-width: 1000px;
+    }
+    h1 {
+      color: #d3a518;
+      font-weight: 900;
+      letter-spacing: 0.1em;
+      margin-bottom: 1rem;
+    }
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      background-color: #1e2227;
+      box-shadow: 0 0 20px #d3a518aa;
+      border-radius: 8px;
+      overflow: hidden;
+    }
+    th, td {
+      border: 1px solid #444;
+      padding: 0.75rem 1rem;
+      vertical-align: top;
+      font-size: 0.9rem;
+    }
+    th {
+      background-color: #d3a518;
+      color: #161b22;
+      font-weight: 700;
+      user-select: none;
+    }
+    tr:nth-child(even) {
+      background-color: #282c31;
+    }
+    textarea {
+      width: 100%;
+      height: 80px;
+      resize: none;
+      border: none;
+      background-color: #2b2f36;
+      color: #f1f1f1;
+      font-family: monospace;
+      padding: 0.5rem;
+      border-radius: 4px;
+    }
   </style>
 </head>
 <body>
