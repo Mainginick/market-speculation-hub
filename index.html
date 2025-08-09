@@ -1,600 +1,239 @@
-<!DOCTYPE html><html lang="en-US"><head><style>
-  body {
-    background: #f7f8fa;
-    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    margin:0;
-    color: #222;
-  }
-  header {
-    background: #fff;
-    color: #222;
-    padding: 2rem 0 1rem 0;
-    text-align: left;
-    box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-    border-bottom: 2px solid #6a1b9a;
-    display: flex;
-    align-items: center;
-    justify-content: flex-start;
-    gap: 2rem;
-  }
-  header h1 {
-    font-size:2.6rem;
-    margin:0 2rem 0 2rem;
-    letter-spacing:-1px;
-    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    font-weight: 700;
-    color: #222;
-    text-shadow: none;
-  }
-  header p {
-    font-size:1.2rem;
-    margin-top:0.5rem;
-    color: #444;
-    font-weight: 500;
-  }
-  #live-carousel {
-    background: #f7f8fa;
-    color: #222;
-    font-size:1.15rem;
-    font-weight:600;
-    padding:1rem 0 0.5rem 0;
-    overflow:hidden;
-    position:relative;
-    border-bottom: 1px solid #6a1b9a;
-  }
-  #carousel-content span {
-    font-family: 'Roboto Mono', 'Consolas', monospace;
-    margin-right:2.5rem;
-    font-size:1.1rem;
-    background:#fff;
-    border-radius:6px;
-    padding:0.3rem 1rem;
-    box-shadow:0 1px 4px rgba(0,0,0,0.08);
-    color: #222;
-    font-weight: 500;
-  }
-  #carousel-content span span {
-    font-weight:700;
-  }
-  nav {
-    background:#fff;
-    box-shadow:0 2px 8px rgba(0,0,0,0.08);
-    display:flex;
-    justify-content:flex-start;
-    gap:2rem;
-    padding:1rem 2rem;
-    font-size:1.15rem;
-    border-bottom: 1px solid #6a1b9a;
-  }
-  nav a {
-    color:#222;
-    text-decoration:none;
-    font-weight:600;
-    padding:0.5rem 1.2rem;
-    border-radius:6px;
-    transition: background 0.2s, color 0.2s;
-  }
-  nav a:hover {
-    background: #e3e6f3;
-    color: #6a1b9a;
-  }
-  main {
-    max-width:900px;
-    margin:2rem auto;
-    background:#fff;
-    border-radius:16px;
-    box-shadow:0 4px 24px rgba(0,0,0,0.08);
-    padding:2rem;
-    border: 1px solid #e3e6f3;
-    color: #222;
-  }
-  section h2 {
-    color:#6a1b9a;
-    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    font-size:2.1rem;
-    margin-bottom:0.7rem;
-    font-weight:700;
-    letter-spacing:-1px;
-  }
-  #gallery h2, #comments h2, #forex-news h2, #about h2 {
-    color:#6a1b9a;
-  }
-  #admin-upload-form {
-    margin-bottom:1.5rem;
-    background:#f7f8fa;
-    padding:1rem;
-    border-radius:8px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.06);
-    border: 1px solid #e3e6f3;
-  }
-  #admin-upload-form label {
-    color:#6a1b9a;
-    font-weight:600;
-  }
-  #admin-upload-form input[type="file"] {
-    background:#fff;
-    color:#222;
-    border:1px solid #6a1b9a;
-    border-radius:4px;
-    padding:0.3rem;
-  }
-  #admin-upload-form button {
-    background:#6a1b9a;
-    color:#fff;
-    border:none;
-    padding:0.5rem 1.5rem;
-    border-radius:4px;
-    font-size:1rem;
-    cursor:pointer;
-    font-weight:700;
-    transition: background 0.2s;
-  }
-  #admin-upload-form button:hover {
-    background:#222;
-    color:#fff;
-  }
-  #media-gallery {
-    display:grid;
-    grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
-    gap:1rem;
-  }
-  #media-gallery > div {
-    background:#f7f8fa;
-    border-radius:8px;
-    color:#222;
-    font-size:1.2rem;
-    box-shadow:0 2px 8px rgba(0,0,0,0.06);
-    border: 1px solid #e3e6f3;
-    padding:0.5rem;
-  }
-  #media-gallery img, #media-gallery video {
-    border-radius:8px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.08);
-    border: 1px solid #e3e6f3;
-    background: #fff;
-  }
-  #media-gallery button {
-    background: #e74c3c;
-    color: #fff;
-    border: none;
-    border-radius: 4px;
-    padding: 0.3rem 0.8rem;
-    cursor: pointer;
-    font-weight:700;
-    box-shadow:0 1px 4px rgba(0,0,0,0.08);
-  }
-  #comments {
-    margin-top:2rem;
-  }
-  #comment-form textarea {
-    width:100%;
-    border-radius:8px;
-    border:1px solid #6a1b9a;
-    padding:0.5rem;
-    font-size:1rem;
-    background:#fff;
-    color:#222;
-  }
-  #comment-form button {
-    background:#6a1b9a;
-    color:#fff;
-    border:none;
-    padding:0.5rem 1.5rem;
-    border-radius:4px;
-    font-size:1rem;
-    cursor:pointer;
-    margin-top:0.5rem;
-    font-weight:700;
-    transition: background 0.2s;
-  }
-  #comment-form button:hover {
-    background:#222;
-    color:#fff;
-  }
-  #comment-list li {
-    background: #f7f8fa;
-    color: #222;
-    margin-bottom: 0.5rem;
-    padding: 0.5rem 1rem;
-    border-radius: 8px;
-    border: 1px solid #e3e6f3;
-    font-family: 'Roboto Mono', 'Consolas', monospace;
-  }
-  #forex-news-list {
-    background:#f7f8fa;
-    border-radius:12px;
-    box-shadow:0 2px 8px rgba(0,0,0,0.06);
-    padding:1.5rem;
-    border: 1px solid #e3e6f3;
-    color: #222;
-  }
-  #forex-news-list div {
-    background:#fff;
-    color:#222;
-    margin-bottom:0.7rem;
-    padding:0.7rem 1rem;
-    border-radius:8px;
-    font-size:1.1rem;
-    font-weight:600;
-    box-shadow:0 1px 4px rgba(0,0,0,0.04);
-    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    border: 1px solid #e3e6f3;
-  }
-  #about p, #analysis p {
-    color:#222;
-    font-size:1.15rem;
-  }
-  footer {
-    background:#fff;
-    color:#222;
-    text-align:center;
-    padding:1rem 0;
-    margin-top:2rem;
-    border-radius:0 0 16px 16px;
-    border-top: 2px solid #6a1b9a;
-    font-family: 'Segoe UI', 'Roboto', 'Arial', sans-serif;
-    font-size:1rem;
-  }
-  /* Neon green/red for price changes */
-  #carousel-content span span {
-    color: inherit !important;
-  }
-  #carousel-content .price-up {
-    color: #00b300 !important;
-    text-shadow: 0 0 4px #00b300;
-  }
-  #carousel-content .price-down {
-    color: #e74c3c !important;
-    text-shadow: 0 0 4px #e74c3c;
-  }
-  /* Glassy effect for cards */
-  main, #media-gallery > div, #forex-news-list {
-    backdrop-filter: blur(1px);
-    -webkit-backdrop-filter: blur(1px);
-  }
-  /* Responsive tweaks */
-  @media (max-width: 900px) {
-    main {
-      padding:1rem;
-    }
-    nav {
-      gap:1rem;
-      font-size:1rem;
-    }
-    header h1 {
-      font-size:2.2rem;
-    }
-  }
-  @media (max-width: 600px) {
-    main {
-      padding:0.5rem;
-    }
-    nav {
-      gap:0.5rem;
-      font-size:0.95rem;
-    }
-    header h1 {
-      font-size:1.5rem;
-    }
-  }
-</style></head><body style="background: linear-gradient(135deg, #e0eafc 0%, #cfdef3 100%); font-family: 'Open Sans', Arial, sans-serif; margin:0;">
-  <!-- Banner -->
-  <header style="background: linear-gradient(90deg, #1e3c72 0%, #2a5298 100%); color: #fff; padding: 2rem 0; text-align: center; box-shadow: 0 2px 8px rgba(30,60,114,0.15);">
-    <h1 style="font-size:3rem; margin:0; letter-spacing:-2px;">Market Speculation Hub</h1>
-    <p style="font-size:1.2rem; margin-top:0.5rem;">Nasdaq & ES Analysis — <span style="color:#ffd700;">Not Trading Advice</span></p>
-  </header>
+"""
+Market Speculation Hub - Message & Admin Backend (Pure Python Flask)
 
-  <!-- Dynamic Live Feed Carousel Banner -->
-  <div id="live-carousel">
-    <div style="margin-bottom:1rem; text-align:center;">
-      <span style="font-size:1.2rem; font-weight:700; color:#6a1b9a; background:#23242a; padding:0.5rem 1.5rem; border-radius:8px; display:inline-block; margin-bottom:0.5rem;">LIVE</span><br>
-      <iframe width="560" height="315" src="https://www.youtube.com/embed/MZ46gxsJlUw?si=dqj5UDIsmoRyUVqS&amp;autoplay=1" title="YouTube live stream" frameborder="0" allow="autoplay; encrypted-media" allowfullscreen style="border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.18); margin-bottom:1rem;"></iframe>
-    </div>
-    <div id="carousel-content" style="white-space:nowrap; display:inline-block; animation: moveBanner 30s linear infinite;"></div>
-  </div>
+--------------------------------------------------------------
+How to deploy and run this app:
+
+1) Install dependencies:
+   pip install flask
+
+2) Set environment variables before running the app:
+
+   On Linux/macOS (bash):
+     export ADMIN_USERNAME=youradminusername
+     export ADMIN_PASSWORD=yourstrongpassword
+     export ICLOUD_EMAIL=nickmaingi06@icloud.com
+     export ICLOUD_APP_PASSWORD=your-app-specific-password
+
+   On Windows (PowerShell):
+     setx ADMIN_USERNAME youradminusername
+     setx ADMIN_PASSWORD yourstrongpassword
+     setx ICLOUD_EMAIL nickmaingi06@icloud.com
+     setx ICLOUD_APP_PASSWORD your-app-specific-password
+
+3) Run the app:
+   python app.py
+
+4) Open your browser:
+   - Contact form: http://localhost:8000/
+   - Admin panel (login required): http://localhost:8000/admin
+
+--------------------------------------------------------------
+Notes:
+
+- This app stores messages locally in 'messages.db' SQLite database file.
+- Sends email via iCloud SMTP using provided credentials.
+- Admin panel protected with HTTP Basic Authentication.
+- No JavaScript needed anywhere; pure HTML rendering.
+- For production, use HTTPS and secure environment variables.
+"""
+
+from flask import Flask, request, redirect, url_for, Response
+import smtplib
+from email.mime.text import MIMEText
+from email.header import Header
+import sqlite3
+from functools import wraps
+import os
+from datetime import datetime
+
+app = Flask(__name__)
+DATABASE = 'messages.db'
+
+# Fetch credentials from environment variables
+ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
+ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'password')
+ICLOUD_EMAIL = os.getenv('ICLOUD_EMAIL', 'nickmaingi06@icloud.com')
+ICLOUD_APP_PASSWORD = os.getenv('ICLOUD_APP_PASSWORD', '')
+
+# Initialize SQLite DB for messages
+def init_db():
+    with sqlite3.connect(DATABASE) as conn:
+        conn.execute('''
+            CREATE TABLE IF NOT EXISTS messages (
+                id INTEGER PRIMARY KEY AUTOINCREMENT,
+                name TEXT NOT NULL,
+                email TEXT NOT NULL,
+                message TEXT NOT NULL,
+                timestamp TEXT NOT NULL
+            )
+        ''')
+
+init_db()
+
+# Basic Auth helper functions
+def check_auth(username, password):
+    return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
+
+def authenticate():
+    return Response(
+        'Authentication required.', 401,
+        {'WWW-Authenticate': 'Basic realm="Login Required"'})
+
+def requires_auth(f):
+    @wraps(f)
+    def decorated(*args, **kwargs):
+        auth = request.authorization
+        if not auth or not check_auth(auth.username, auth.password):
+            return authenticate()
+        return f(*args, **kwargs)
+    return decorated
+
+# Escape HTML to prevent XSS
+def esc(s):
+    return (s or '').replace('&', '&amp;').replace('<','&lt;').replace('>','&gt;').replace('"','&quot;').replace("'", '&#39;')
+
+# Routes
+
+@app.route('/', methods=['GET'])
+def index():
+    # Contact form page (pure HTML, no JS)
+    return '''
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Message the Creator</title>
   <style>
-    @keyframes moveBanner {
-      0% { transform: translateX(100%); }
-      100% { transform: translateX(-100%); }
-    }
-    #carousel-content {
-      animation: moveBanner 90s linear infinite !important;
-    }
+    body { font-family: Arial, sans-serif; max-width: 600px; margin: 2rem auto; }
+    label { display: block; margin-top: 1rem; }
+    input, textarea { width: 100%; padding: 0.5rem; }
+    button { margin-top: 1rem; padding: 0.7rem 1.2rem; background-color: teal; color: white; border: none; cursor: pointer; }
   </style>
+</head>
+<body>
+  <h1>Message the Creator</h1>
+  <form action="/send" method="post">
+    <label for="name">Your Name</label>
+    <input id="name" name="name" required maxlength="100" />
 
-  <!-- Navigation Menu -->
-  <nav style="background:#fff; box-shadow:0 2px 8px rgba(0,0,0,0.08); display:flex; justify-content:flex-start; gap:2rem; padding:1rem 2rem; font-size:1.15rem;">
-    <a href="#home" style="color:#222; text-decoration:none; font-weight:600;">Home</a>
-    <a href="#analysis" style="color:#222; text-decoration:none; font-weight:600;">Analysis</a>
-    <a href="#gallery" style="color:#222; text-decoration:none; font-weight:600;">Gallery</a>
-    <a href="#news" style="color:#222; text-decoration:none; font-weight:600;">News</a>
-    <a href="#about" style="color:#222; text-decoration:none; font-weight:600;">About</a>
-  </nav>
+    <label for="email">Your Email</label>
+    <input id="email" type="email" name="email" required maxlength="254" />
 
-  <!-- Main Content -->
-  <main style="max-width:900px; margin:2rem auto; background:#fff; border-radius:16px; box-shadow:0 4px 24px rgba(0,0,0,0.08); padding:2rem;">
-    <section id="analysis">
-      <h2 style="color:#6a1b9a;">Latest Market Analysis</h2>
-      <p style="color:#f5f6fa;">Here you'll find speculative insights and commentary on Nasdaq and ES. <strong>This is not trading advice.</strong> All content is for educational and entertainment purposes only.</p>
-    </section>
-    <section id="gallery" style="margin-top:2rem;">
-      <h2 style="color:#6a1b9a;">Admin Gallery: Pictures & Videos</h2>
-      <form id="admin-upload-form" style="margin-bottom:1.5rem; background:#f7f8fa; padding:1rem; border-radius:8px; box-shadow:0 2px 8px rgba(0,0,0,0.06);">
-        <label for="admin-upload" style="display:block; margin-bottom:0.5rem; color:#6a1b9a; font-weight:600;">Add Analysis Media (Admin Only):</label>
-        <input type="file" id="admin-upload" name="admin-upload" accept="image/*,video/*" multiple style="margin-bottom:0.5rem;">
-        <button type="submit" style="background:#6a1b9a; color:#fff; border:none; padding:0.5rem 1.5rem; border-radius:4px; font-size:1rem; cursor:pointer;">Upload</button>
-      </form>
-      <div id="media-gallery" style="display:grid; grid-template-columns:repeat(auto-fit,minmax(220px,1fr)); gap:1rem;">
-        <!-- Admin uploaded images/videos will appear here -->
-        <div style="width:100%; height:180px; display:flex; align-items:center; justify-content:center; background:#e0eafc; border-radius:8px; color:#2a5298; font-size:1.2rem; box-shadow:0 2px 8px rgba(30,60,114,0.08);">
-          No media uploaded yet.
-        </div>
-      </div>
-      <!-- Comment Section -->
-      <section id="comments" style="margin-top:2rem;">
-        <h2 style="color:#6a1b9a;">Comments</h2>
-        <form id="comment-form" style="margin-bottom:1rem;">
-          <textarea id="comment-input" rows="3" style="width:100%; border-radius:8px; border:1px solid #6a1b9a; padding:0.5rem; font-size:1rem;" placeholder="Add your comment..."></textarea>
-          <button type="submit" style="background:#6a1b9a; color:#fff; border:none; padding:0.5rem 1.5rem; border-radius:4px; font-size:1rem; cursor:pointer; margin-top:0.5rem;">Post Comment</button>
-        </form>
-        <ul id="comment-list" style="list-style:none; padding:0; margin:0;"></ul>
-      </section>
-      <script>
-        // Prevent screenshot, right-click, drag, and download
-        document.addEventListener('contextmenu', e => e.preventDefault());
-        document.addEventListener('keydown', function(e) {
-          if (e.key === 'PrintScreen' || (e.ctrlKey && e.key === 'p')) {
-            e.preventDefault();
-          }
-        });
-        document.body.style.userSelect = 'none';
-        document.body.style.webkitUserSelect = 'none';
-        document.body.style.msUserSelect = 'none';
-        document.body.style.mozUserSelect = 'none';
-        // Prevent drag
-        document.addEventListener('dragstart', e => e.preventDefault());
-        // Prevent image/video download
-        document.querySelectorAll('img, video').forEach(el => {
-          el.setAttribute('draggable', 'false');
-          el.setAttribute('oncontextmenu', 'return false;');
-        });
-        // Handle media upload and delete
-        const form = document.getElementById('admin-upload-form');
-        const input = document.getElementById('admin-upload');
-        const gallery = document.getElementById('media-gallery');
-        form.addEventListener('submit', function(e) {
-          e.preventDefault();
-          if (!input.files.length) return;
-          gallery.innerHTML = '';
-          Array.from(input.files).forEach((file, idx) => {
-            const reader = new FileReader();
-            reader.onload = function(ev) {
-              let wrapper = document.createElement('div');
-              wrapper.style.position = 'relative';
-              let el;
-              if (file.type.startsWith('image/')) {
-                el = document.createElement('img');
-                el.src = ev.target.result;
-                el.alt = file.name;
-                el.style.width = '100%';
-                el.style.borderRadius = '8px';
-                el.style.boxShadow = '0 2px 8px rgba(30,60,114,0.08)';
-                el.setAttribute('draggable', 'false');
-                el.setAttribute('oncontextmenu', 'return false;');
-              } else if (file.type.startsWith('video/')) {
-                el = document.createElement('video');
-                el.controls = true;
-                el.style.width = '100%';
-                el.style.borderRadius = '8px';
-                el.style.boxShadow = '0 2px 8px rgba(30,60,114,0.08)';
-                el.setAttribute('draggable', 'false');
-                el.setAttribute('oncontextmenu', 'return false;');
-                const source = document.createElement('source');
-                source.src = ev.target.result;
-                source.type = file.type;
-                el.appendChild(source);
-              }
-              // Delete button
-              const delBtn = document.createElement('button');
-              delBtn.textContent = 'Delete';
-              delBtn.style.position = 'absolute';
-              delBtn.style.top = '8px';
-              delBtn.style.right = '8px';
-              delBtn.style.background = '#e74c3c';
-              delBtn.style.color = '#fff';
-              delBtn.style.border = 'none';
-              delBtn.style.borderRadius = '4px';
-              delBtn.style.padding = '0.3rem 0.8rem';
-              delBtn.style.cursor = 'pointer';
-              delBtn.onclick = function() {
-                wrapper.remove();
-              };
-              wrapper.appendChild(el);
-              wrapper.appendChild(delBtn);
-              gallery.appendChild(wrapper);
-            };
-            reader.readAsDataURL(file);
-          });
-        });
-        // Comment section logic
-        const commentForm = document.getElementById('comment-form');
-        const commentInput = document.getElementById('comment-input');
-        const commentList = document.getElementById('comment-list');
-        commentForm.addEventListener('submit', function(e) {
-          e.preventDefault();
-          const text = commentInput.value.trim();
-          if (!text) return;
-          const li = document.createElement('li');
-          li.textContent = text;
-          li.style.background = '#f7faff';
-          li.style.marginBottom = '0.5rem';
-          li.style.padding = '0.5rem 1rem';
-          li.style.borderRadius = '8px';
-          commentList.appendChild(li);
-          commentInput.value = '';
-        });
-        // Live feed for Nasdaq, S&P 500, US30, and other stocks
-        async function fetchMarketData() {
-          // Add more symbols as needed
-          const symbols = [
-            { name: 'Nasdaq', symbol: '^IXIC' },
-            { name: 'S&P 500', symbol: '^GSPC' },
-            { name: 'US30', symbol: '^DJI' },
-            { name: 'Apple', symbol: 'AAPL' },
-            { name: 'Microsoft', symbol: 'MSFT' },
-            { name: 'Google', symbol: 'GOOGL' },
-            { name: 'Amazon', symbol: 'AMZN' },
-            { name: 'Tesla', symbol: 'TSLA' },
-            { name: 'Meta', symbol: 'META' },
-            { name: 'Nvidia', symbol: 'NVDA' },
-            { name: 'Gold', symbol: 'GC=F' },
-            { name: 'Crude Oil', symbol: 'CL=F' }
-          ];
-          let results = [];
-          for (const s of symbols) {
-            try {
-              const res = await fetch(`https://query1.finance.yahoo.com/v7/finance/quote?symbols=${s.symbol}`);
-              const data = await res.json();
-              const quote = data.quoteResponse.result[0];
-              if (quote) {
-                results.push({
-                  name: s.name,
-                  price: quote.regularMarketPrice,
-                  change: quote.regularMarketChangePercent
-                });
-              }
-            } catch (e) {
-              results.push({ name: s.name, price: 'N/A', change: 'N/A' });
-            }
-          }
-          return results;
-        }
-        function updateCarousel(prices) {
-          const carousel = document.getElementById('carousel-content');
-          carousel.innerHTML = prices.map(p =>
-            `<span style='margin-right:2.5rem;'>${p.name}: <span style='color:#ffd700;'>${p.price}</span> (<span style='color:${p.change > 0 ? '#4caf50' : '#e74c3c'};'>${p.change > 0 ? '+' : ''}${p.change}%</span>)</span>`
-          ).join('');
-        }
-        async function refreshMarketFeed() {
-          const prices = await fetchMarketData();
-          updateCarousel(prices);
-        }
-        refreshMarketFeed();
-        setInterval(refreshMarketFeed, 60000); // Refresh every minute
-      </script>
-    </section>
-    <section id="news" style="margin-top:2rem; display:none;">
-      <h2 style="color:#6a1b9a;">News</h2>
-      <section id="forex-news">
-        <h3 style="color:#6a1b9a;">Economic Headlines (USD & GBP)</h3>
-        <div id="forex-news-list" style="background:#f7f8fa; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:1.5rem;">
-          <div style="color:#888; text-align:center;">Loading latest news...</div>
-        </div>
-      </section>
-      <section id="trump-news" style="margin-top:2rem;">
-        <h3 style="color:#6a1b9a;">Trump News</h3>
-        <div id="trump-news-list" style="background:#f7f8fa; border-radius:12px; box-shadow:0 2px 8px rgba(0,0,0,0.06); padding:1.5rem;">
-          <div style="color:#888; text-align:center;">Loading Trump news...</div>
-        </div>
-      </section>
-    </section>
-    <script>
-      // News page logic: show/hide sections
-      function showSection(id) {
-        document.querySelectorAll('main > section').forEach(sec => sec.style.display = 'none');
-        const el = document.getElementById(id);
-        if (el) el.style.display = '';
-      }
-      window.addEventListener('hashchange', function() {
-        const hash = location.hash.replace('#', '') || 'analysis';
-        showSection(hash);
-      });
-      // Show default section
-      showSection((location.hash.replace('#', '') || 'analysis'));
+    <label for="message">Message</label>
+    <textarea id="message" name="message" rows="6" required maxlength="5000"></textarea>
 
-      // Economic News Aggregator (USD & GBP only)
-      async function fetchEconomicNews() {
-        const feeds = [
-          'https://www.reuters.com/rssFeed/economyNews',
-          'https://www.cnbc.com/id/10001147/device/rss/rss.html',
-          'https://www.investing.com/rss/news_25.rss',
-          'https://feeds.a.dj.com/rss/RSSMarketsMain.xml',
-          'https://www.ft.com/?format=rss',
-        ];
-        let headlines = [];
-        await Promise.all(feeds.map(async url => {
-          try {
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
-            const res = await fetch(apiUrl);
-            const data = await res.json();
-            if (data.items && data.items.length) {
-              headlines = headlines.concat(
-                data.items
-                  .filter(item => /\b(USD|GBP|dollar|pound|sterling|US dollar|British pound)\b/i.test(item.title))
-                  .slice(0, 5)
-                  .map(item => item.title)
-              );
-            }
-          } catch (e) {
-            // Ignore errors for individual feeds
-          }
-        }));
-        return headlines.length ? headlines.slice(0, 10) : ['No USD/GBP news available.'];
-      }
-      async function updateEconomicNews() {
-        const newsList = document.getElementById('forex-news-list');
-        if (!newsList) return;
-        const headlines = await fetchEconomicNews();
-        newsList.innerHTML = headlines.map(h =>
-          `<div style='background:#191b1f; color:#6a1b9a; margin-bottom:0.7rem; padding:0.7rem 1rem; border-radius:8px; font-size:1.05rem; box-shadow:0 1px 4px rgba(0,0,0,0.10);'>${h}</div>`
-        ).join('');
-      }
-      updateEconomicNews();
-      setInterval(updateEconomicNews, 3600000); // Refresh every hour
-
-      // Trump News Aggregator
-      async function fetchTrumpNews() {
-        const feeds = [
-          'https://www.reuters.com/rssFeed/topNews',
-          'https://rss.nytimes.com/services/xml/rss/nyt/Politics.xml',
-          'https://feeds.a.dj.com/rss/RSSWorldNews.xml',
-          'https://www.cnbc.com/id/100727362/device/rss/rss.html',
-          'https://www.politico.com/rss/politics08.xml',
-        ];
-        let headlines = [];
-        await Promise.all(feeds.map(async url => {
-          try {
-            const apiUrl = `https://api.rss2json.com/v1/api.json?rss_url=${encodeURIComponent(url)}`;
-            const res = await fetch(apiUrl);
-            const data = await res.json();
-            if (data.items && data.items.length) {
-              headlines = headlines.concat(
-                data.items
-                  .filter(item => /\bTrump\b/i.test(item.title))
-                  .slice(0, 5)
-                  .map(item => item.title)
-              );
-            }
-          } catch (e) {
-            // Ignore errors for individual feeds
-          }
-        }));
-        return headlines.length ? headlines.slice(0, 10) : ['No Trump news available.'];
-      }
-      async function updateTrumpNews() {
-        const newsList = document.getElementById('trump-news-list');
-        if (!newsList) return;
-        const headlines = await fetchTrumpNews();
-        newsList.innerHTML = headlines.map(h =>
-          `<div style='background:#191b1f; color:#ffd700; margin-bottom:0.7rem; padding:0.7rem 1rem; border-radius:8px; font-size:1.05rem; box-shadow:0 1px 4px rgba(0,0,0,0.10);'>${h}</div>`
-        ).join('');
-      }
-      updateTrumpNews();
-      setInterval(updateTrumpNews, 3600000); // Refresh every hour
-    </script>
-  </main>
-  <footer>
-    <p style="margin:0;">&copy; 2023 Market Speculation Hub. All rights reserved.</p>
-  </footer>
+    <button type="submit">Send</button>
+  </form>
 </body>
 </html>
+'''
+
+@app.route('/send', methods=['POST'])
+def send_message():
+    name = request.form.get('name', '').strip()
+    email = request.form.get('email', '').strip()
+    message = request.form.get('message', '').strip()
+
+    if not name or not email or not message:
+        return "Name, email and message are required.", 400
+
+    timestamp = datetime.utcnow().isoformat()
+
+    # Store message in SQLite DB
+    with sqlite3.connect(DATABASE) as conn:
+        conn.execute(
+            "INSERT INTO messages (name, email, message, timestamp) VALUES (?, ?, ?, ?)",
+            (name, email, message, timestamp)
+        )
+
+    # Send email via iCloud SMTP
+    try:
+        smtp_host = "smtp.mail.me.com"
+        smtp_port = 587
+
+        msg = MIMEText(f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}", _charset="utf-8")
+        msg['Subject'] = Header(f"New message from website — {name}", 'utf-8')
+        msg['From'] = ICLOUD_EMAIL
+        msg['To'] = ICLOUD_EMAIL
+        msg['Reply-To'] = email
+
+        server = smtplib.SMTP(smtp_host, smtp_port)
+        server.starttls()
+        server.login(ICLOUD_EMAIL, ICLOUD_APP_PASSWORD)
+        server.sendmail(ICLOUD_EMAIL, [ICLOUD_EMAIL], msg.as_string())
+        server.quit()
+    except Exception as e:
+        print("Email send error:", e)
+        return "Failed to send email.", 500
+
+    return redirect(url_for('thank_you'))
+
+@app.route('/thank-you')
+def thank_you():
+    return '''
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Thanks!</title>
+  <style>body { font-family: Arial,sans-serif; max-width:600px; margin:2rem auto; text-align:center; }</style>
+</head>
+<body>
+  <h1>Thank you!</h1>
+  <p>Your message was received and emailed to the creator.</p>
+  <p><a href="/">Back to site</a></p>
+</body>
+</html>
+'''
+
+@app.route('/admin')
+@requires_auth
+def admin_panel():
+    with sqlite3.connect(DATABASE) as conn:
+        cursor = conn.execute("SELECT id, name, email, message, timestamp FROM messages ORDER BY timestamp DESC LIMIT 100")
+        messages = cursor.fetchall()
+
+    # Render messages in a table (no JS)
+    html = '''
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <title>Admin Panel - Messages</title>
+  <style>
+    body { font-family: Arial,sans-serif; max-width: 900px; margin: 2rem auto; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { border: 1px solid #ccc; padding: 0.5rem; vertical-align: top; }
+    th { background: teal; color: white; }
+    textarea { width: 100%; height: 80px; resize: none; border:none; background:#f9f9f9; }
+  </style>
+</head>
+<body>
+  <h1>Admin Panel: Messages</h1>
+  <table>
+    <thead>
+      <tr><th>Name</th><th>Email</th><th>Message</th><th>Timestamp (UTC)</th></tr>
+    </thead>
+    <tbody>
+'''
+    for msg in messages:
+        id_, name, email, message, timestamp = msg
+        html += f'''
+      <tr>
+        <td>{esc(name)}</td>
+        <td>{esc(email)}</td>
+        <td><textarea readonly>{esc(message)}</textarea></td>
+        <td>{esc(timestamp)}</td>
+      </tr>
+'''
+    html += '''
+    </tbody>
+  </table>
+</body>
+</html>
+'''
+    return html
+
+if __name__ == "__main__":
+    app.run(host='0.0.0.0', port=8000)
