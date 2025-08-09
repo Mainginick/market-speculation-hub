@@ -1,47 +1,3 @@
-# Project: Flask Social (Instagram/Facebook-like) — single-file starter
-# Files included (copy into a project folder preserving structure):
-# - requirements.txt
-# - README.md
-# - app.py
-# - templates/base.html
-# - templates/index.html
-# - templates/login.html
-# - templates/register.html
-# - templates/profile.html
-# - static/styles.css
-# - static/uploads/  (folder created at runtime)
-
---- requirements.txt ---
-Flask==2.3.2
-Flask-Login==0.6.2
-Flask-WTF==1.1.1
-SQLAlchemy==1.4.49
-WTForms==3.0.1
-yfinance==0.2.33
-pandas==2.2.2
-python-dotenv==1.0.0
-
---- README.md ---
-# Flask Social — Simple Instagram/Facebook-like starter
-
-This is a single-file Flask-based starter project that provides:
-- User registration & login (Flask-Login)
-- Create posts with image upload (stored under `static/uploads`)
-- Database (SQLite via SQLAlchemy) storing users & posts
-- Live market prices shown below the menu banner (uses `yfinance` on-demand)
-
-**How to run**
-1. Create a Python virtualenv and activate it.
-2. Install requirements: `pip install -r requirements.txt`
-3. Run the app: `python app.py`
-4. Open `http://127.0.0.1:5000` in your browser.
-
-Notes:
-- Images are stored in `static/uploads/` and served as static files.
-- For production use: use a proper cloud file store (S3/GCS) and a real DB (Postgres).
-- yfinance is used to fetch market prices; it scrapes Yahoo Finance and may have rate limits.
-
---- app.py ---
 from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
@@ -52,6 +8,7 @@ from wtforms import StringField, PasswordField, SubmitField, TextAreaField
 from wtforms.validators import InputRequired, Length, EqualTo
 import os
 from datetime import datetime
+from apscheduler.schedulers.background import BackgroundScheduler
 import yfinance as yf
 
 BASE_DIR = os.path.abspath(os.path.dirname(__file__))
@@ -120,6 +77,42 @@ def allowed_file(filename):
 with app.app_context():
     db.create_all()
 
+# Market data cache
+market_data_cache = {}
+
+def fetch_market_data():
+    tickers = ['^DJI', '^GSPC', '^IXIC', 'AAPL', 'MSFT']
+    data = {}
+    try:
+        yf_tickers = yf.Tickers(' '.join(tickers))
+        for t in tickers:
+            tk = yf_tickers.tickers.get(t)
+            if tk is None:
+                tk = yf.Ticker(t)
+            info = tk.history(period='1d')
+            last_price = None
+            change = None
+            if not info.empty:
+                last_price = float(info['Close'][-1])
+                open_price = float(info['Open'][-1])
+                change = last_price - open_price
+            else:
+                q = tk.fast_info if hasattr(tk, 'fast_info') else {}
+                last_price = q.get('last_price')
+            data[t] = {'last': last_price, 'change': change}
+    except Exception as e:
+        print("Market fetch error:", e)
+        return
+    global market_data_cache
+    market_data_cache = data
+
+scheduler = BackgroundScheduler()
+scheduler.add_job(func=fetch_market_data, trigger="interval", minutes=5)
+scheduler.start()
+
+# Initial fetch
+fetch_market_data()
+
 # --- Routes ---
 @app.route('/')
 def index():
@@ -164,7 +157,6 @@ def logout():
 @app.route('/upload', methods=['POST'])
 @login_required
 def upload():
-    # handle image upload and create a post
     if 'image' not in request.files:
         flash('No image part', 'danger')
         return redirect(url_for('index'))
@@ -193,217 +185,11 @@ def profile(username):
 
 @app.route('/market')
 def market():
-    # returns JSON with market prices for a small set of Wall Street indices / tickers
-    # You can change tickers as needed.
-    tickers = ['^DJI', '^GSPC', '^IXIC', 'AAPL', 'MSFT']
-    data = {}
-    try:
-        yf_tickers = yf.Tickers(' '.join(tickers))
-        for t in tickers:
-            tk = yf_tickers.tickers.get(t)
-            if tk is None:
-                # fallback single ticker fetch
-                tk = yf.Ticker(t)
-            info = tk.history(period='1d')
-            last_price = None
-            change = None
-            if not info.empty:
-                last_price = float(info['Close'][-1])
-                open_price = float(info['Open'][-1])
-                change = last_price - open_price
-            else:
-                # try fast info
-                q = tk.fast_info if hasattr(tk, 'fast_info') else {}
-                last_price = q.get('last_price')
-            data[t] = {'last': last_price, 'change': change}
-    except Exception as e:
-        # if yfinance fails, return empty with error message
-        return jsonify({'error': 'Failed to fetch market data', 'detail': str(e)}), 500
-    return jsonify(data)
+    return jsonify(market_data_cache)
 
 @app.route('/uploads/<filename>')
 def uploaded_file(filename):
     return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-# --- Templates (rendered from files listed below) ---
-
 if __name__ == '__main__':
     app.run(debug=True)
-
---- templates/base.html ---
-<!doctype html>
-<html lang="en">
-  <head>
-    <meta charset="utf-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Flask Social</title>
-    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
-  </head>
-  <body>
-    <nav class="topbar">
-      <div class="brand"><a href="/">FlaskSocial</a></div>
-      <div class="menu">
-        {% if current_user.is_authenticated %}
-          <a href="/user/{{ current_user.username }}">{{ current_user.username }}</a>
-          <a href="/logout">Logout</a>
-        {% else %}
-          <a href="/login">Login</a>
-          <a href="/register">Register</a>
-        {% endif %}
-      </div>
-    </nav>
-
-    <div class="market-banner" id="market-banner">
-      Loading market prices...
-    </div>
-
-    <div class="container">
-      {% with messages = get_flashed_messages(with_categories=true) %}
-        {% if messages %}
-          <ul class="flashes">
-            {% for category, message in messages %}
-              <li class="flash {{ category }}">{{ message }}</li>
-            {% endfor %}
-          </ul>
-        {% endif %}
-      {% endwith %}
-
-      {% block content %}{% endblock %}
-    </div>
-
-    <script>
-    async function fetchMarket(){
-      try{
-        const res = await fetch('/market');
-        const json = await res.json();
-        if(json.error){
-          document.getElementById('market-banner').innerText = 'Market data unavailable';
-          return;
-        }
-        let parts = [];
-        for(const k in json){
-          const v = json[k];
-          const price = v.last ? v.last.toFixed(2) : 'N/A';
-          const ch = (v.change==null) ? '' : (v.change>=0? '+':'') + v.change.toFixed(2);
-          parts.push(`${k}: ${price} ${ch}`);
-        }
-        document.getElementById('market-banner').innerText = parts.join('  |  ');
-      }catch(e){
-        document.getElementById('market-banner').innerText = 'Market fetch failed';
-      }
-    }
-    fetchMarket();
-    setInterval(fetchMarket, 60 * 1000); // refresh every minute
-    </script>
-  </body>
-</html>
-
---- templates/index.html ---
-{% extends 'base.html' %}
-{% block content %}
-  <div class="left">
-    {% if current_user.is_authenticated %}
-      <form action="/upload" method="post" enctype="multipart/form-data" class="upload-form">
-        <label>Choose image:</label>
-        <input type="file" name="image" accept="image/*" required>
-        <textarea name="caption" placeholder="Write a caption..." rows="2"></textarea>
-        <button type="submit">Post</button>
-      </form>
-    {% else %}
-      <p><a href="/login">Log in</a> to post images.</p>
-    {% endif %}
-
-    <div class="feed">
-      {% for post in posts %}
-        <div class="post">
-          <div class="post-header">
-            <a href="/user/{{ post.user.username }}">{{ post.user.username }}</a>
-            <span class="time">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
-          </div>
-          <div class="post-image">
-            <img src="/uploads/{{ post.image_filename }}" alt="post image">
-          </div>
-          {% if post.caption %}
-            <div class="caption">{{ post.caption }}</div>
-          {% endif %}
-        </div>
-      {% else %}
-        <p>No posts yet — be the first!</p>
-      {% endfor %}
-    </div>
-  </div>
-  <aside class="right">
-    <h3>Users</h3>
-    <ul>
-      {% for user in users if false %}{% endfor %}
-      <!-- could add user list here -->
-    </ul>
-  </aside>
-{% endblock %}
-
---- templates/login.html ---
-{% extends 'base.html' %}
-{% block content %}
-  <div class="auth">
-    <h2>Login</h2>
-    <form method="post">
-      {{ form.hidden_tag() }}
-      <div>{{ form.username.label }} {{ form.username() }}</div>
-      <div>{{ form.password.label }} {{ form.password() }}</div>
-      <div>{{ form.submit() }}</div>
-    </form>
-  </div>
-{% endblock %}
-
---- templates/register.html ---
-{% extends 'base.html' %}
-{% block content %}
-  <div class="auth">
-    <h2>Register</h2>
-    <form method="post">
-      {{ form.hidden_tag() }}
-      <div>{{ form.username.label }} {{ form.username() }}</div>
-      <div>{{ form.password.label }} {{ form.password() }}</div>
-      <div>{{ form.confirm.label }} {{ form.confirm() }}</div>
-      <div>{{ form.submit() }}</div>
-    </form>
-  </div>
-{% endblock %}
-
---- templates/profile.html ---
-{% extends 'base.html' %}
-{% block content %}
-  <h2>{{ user.username }}'s profile</h2>
-  <div class="user-posts">
-    {% for post in posts %}
-      <div class="post">
-        <div class="post-image"><img src="/uploads/{{ post.image_filename }}"></div>
-        <div class="caption">{{ post.caption }}</div>
-      </div>
-    {% else %}
-      <p>No posts yet.</p>
-    {% endfor %}
-  </div>
-{% endblock %}
-
---- static/styles.css ---
-body{font-family: Arial, sans-serif; margin:0; background:#f6f7fb}
-.topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;background:#fff;border-bottom:1px solid #ddd}
-.topbar .brand a{font-weight:700;text-decoration:none;color:#333}
-.topbar .menu a{margin-left:12px;text-decoration:none;color:#007bff}
-.container{max-width:1000px;margin:20px auto;display:flex;gap:20px}
-.left{flex:2}
-.right{flex:1}
-.upload-form{background:#fff;padding:12px;border:1px solid #e2e2e2;border-radius:6px;margin-bottom:16px}
-.feed .post{background:#fff;border:1px solid #eaeaea;border-radius:6px;margin-bottom:12px;padding:8px}
-.post-image img{max-width:100%;height:auto;display:block;border-radius:4px}
-.market-banner{background:#111;color:#fff;padding:8px 12px;text-align:center}
-.auth{max-width:400px;background:#fff;padding:16px;border-radius:6px}
-.flashes{list-style:none;padding:0}
-.flash{padding:8px;margin-bottom:8px;border-radius:4px}
-.flash.success{background:#e6ffed;border:1px solid #b8f1c6}
-.flash.danger{background:#ffe6e6;border:1px solid #f1b8b8}
-
---- END OF CONTENT ---
-
-# Save this canvas into files in a project directory. Follow README to run.
