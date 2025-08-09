@@ -1,163 +1,409 @@
-from flask import Flask, request, redirect, url_for, Response
-import sqlite3
+# Project: Flask Social (Instagram/Facebook-like) — single-file starter
+# Files included (copy into a project folder preserving structure):
+# - requirements.txt
+# - README.md
+# - app.py
+# - templates/base.html
+# - templates/index.html
+# - templates/login.html
+# - templates/register.html
+# - templates/profile.html
+# - static/styles.css
+# - static/uploads/  (folder created at runtime)
+
+--- requirements.txt ---
+Flask==2.3.2
+Flask-Login==0.6.2
+Flask-WTF==1.1.1
+SQLAlchemy==1.4.49
+WTForms==3.0.1
+yfinance==0.2.33
+pandas==2.2.2
+python-dotenv==1.0.0
+
+--- README.md ---
+# Flask Social — Simple Instagram/Facebook-like starter
+
+This is a single-file Flask-based starter project that provides:
+- User registration & login (Flask-Login)
+- Create posts with image upload (stored under `static/uploads`)
+- Database (SQLite via SQLAlchemy) storing users & posts
+- Live market prices shown below the menu banner (uses `yfinance` on-demand)
+
+**How to run**
+1. Create a Python virtualenv and activate it.
+2. Install requirements: `pip install -r requirements.txt`
+3. Run the app: `python app.py`
+4. Open `http://127.0.0.1:5000` in your browser.
+
+Notes:
+- Images are stored in `static/uploads/` and served as static files.
+- For production use: use a proper cloud file store (S3/GCS) and a real DB (Postgres).
+- yfinance is used to fetch market prices; it scrapes Yahoo Finance and may have rate limits.
+
+--- app.py ---
+from flask import Flask, render_template, request, redirect, url_for, flash, jsonify, send_from_directory
+from flask_sqlalchemy import SQLAlchemy
+from flask_login import LoginManager, login_user, logout_user, login_required, current_user, UserMixin
+from werkzeug.security import generate_password_hash, check_password_hash
+from werkzeug.utils import secure_filename
+from flask_wtf import FlaskForm
+from wtforms import StringField, PasswordField, SubmitField, TextAreaField
+from wtforms.validators import InputRequired, Length, EqualTo
 import os
 from datetime import datetime
-import smtplib
-from email.mime.text import MIMEText
-from email.header import Header
-from functools import wraps
+import yfinance as yf
+
+BASE_DIR = os.path.abspath(os.path.dirname(__file__))
+UPLOAD_FOLDER = os.path.join(BASE_DIR, 'static', 'uploads')
+if not os.path.exists(UPLOAD_FOLDER):
+    os.makedirs(UPLOAD_FOLDER)
 
 app = Flask(__name__)
-DATABASE = 'messages.db'
+app.config['SQLALCHEMY_DATABASE_URI'] = 'sqlite:///' + os.path.join(BASE_DIR, 'app.db')
+app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+app.config['SECRET_KEY'] = os.environ.get('SECRET_KEY', 'dev-secret-key')
+app.config['UPLOAD_FOLDER'] = UPLOAD_FOLDER
+app.config['MAX_CONTENT_LENGTH'] = 16 * 1024 * 1024  # 16MB limit
 
-ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
-ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'password')
-ICLOUD_EMAIL = os.getenv('ICLOUD_EMAIL', 'nickmaingi06@icloud.com')
-ICLOUD_APP_PASSWORD = os.getenv('ICLOUD_APP_PASSWORD', '')
+ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-def init_db():
-    with sqlite3.connect(DATABASE) as conn:
-        conn.execute('''
-            CREATE TABLE IF NOT EXISTS messages (
-                id INTEGER PRIMARY KEY AUTOINCREMENT,
-                name TEXT NOT NULL,
-                email TEXT NOT NULL,
-                message TEXT NOT NULL,
-                timestamp TEXT NOT NULL
-            )
-        ''')
+db = SQLAlchemy(app)
+login_manager = LoginManager(app)
+login_manager.login_view = 'login'
 
-init_db()
+# --- Models ---
+class User(UserMixin, db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    username = db.Column(db.String(80), unique=True, nullable=False)
+    password_hash = db.Column(db.String(200), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
-def check_auth(username, password):
-    return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
+    def set_password(self, password):
+        self.password_hash = generate_password_hash(password)
 
-def authenticate():
-    return Response('Authentication required.', 401,
-                    {'WWW-Authenticate': 'Basic realm="Login Required"'})
+    def check_password(self, password):
+        return check_password_hash(self.password_hash, password)
 
-def requires_auth(f):
-    @wraps(f)
-    def decorated(*args, **kwargs):
-        auth = request.authorization
-        if not auth or not check_auth(auth.username, auth.password):
-            return authenticate()
-        return f(*args, **kwargs)
-    return decorated
+class Post(db.Model):
+    id = db.Column(db.Integer, primary_key=True)
+    image_filename = db.Column(db.String(200), nullable=False)
+    caption = db.Column(db.Text, nullable=True)
+    user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
+    user = db.relationship('User', backref=db.backref('posts', lazy=True))
 
-def esc(text):
-    if not text:
-        return ''
-    return (text.replace('&', '&amp;')
-                .replace('<', '&lt;')
-                .replace('>', '&gt;')
-                .replace('"', '&quot;')
-                .replace("'", '&#39;'))
+# --- Forms ---
+class RegisterForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired(), Length(min=3, max=80)])
+    password = PasswordField('Password', validators=[InputRequired(), Length(min=4)])
+    confirm = PasswordField('Confirm password', validators=[InputRequired(), EqualTo('password')])
+    submit = SubmitField('Register')
 
-@app.route('/', methods=['GET'])
+class LoginForm(FlaskForm):
+    username = StringField('Username', validators=[InputRequired()])
+    password = PasswordField('Password', validators=[InputRequired()])
+    submit = SubmitField('Login')
+
+class PostForm(FlaskForm):
+    caption = TextAreaField('Caption', validators=[Length(max=500)])
+    submit = SubmitField('Post')
+
+@login_manager.user_loader
+def load_user(user_id):
+    return User.query.get(int(user_id))
+
+def allowed_file(filename):
+    return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
+
+# Create DB if not exists
+with app.app_context():
+    db.create_all()
+
+# --- Routes ---
+@app.route('/')
 def index():
-    return '''<!doctype html>
-<html lang="en">
-<head>
-  <meta charset="utf-8" />
-  <title>Market Speculation Hub</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <style>
-    /* Styles omitted here for brevity - use full styles from previous code */
-    body { font-family: Arial, sans-serif; background:#0f1113; color:#f1f1f1; }
-    /* Use the full styling as provided in the full code above */
-  </style>
-</head>
-<body>
-  <header>
-    <h1>MARKET SPECULATION HUB</h1>
-    <nav>
-      <a href="/">Home</a>
-      <a href="/admin">Admin</a>
-    </nav>
-  </header>
-  <main>
-    <h2>Message the Creator</h2>
-    <form action="/send" method="post" autocomplete="off" novalidate>
-      <label for="name">Your Name</label>
-      <input id="name" name="name" type="text" maxlength="100" required placeholder="John Doe" />
-      <label for="email">Your Email</label>
-      <input id="email" name="email" type="email" maxlength="254" required placeholder="john@example.com" />
-      <label for="message">Message</label>
-      <textarea id="message" name="message" rows="6" maxlength="5000" required placeholder="Write your message here..."></textarea>
-      <button type="submit">Send Message</button>
-    </form>
-  </main>
-  <footer>&copy; 2025 Market Speculation Hub</footer>
-</body>
-</html>'''
+    posts = Post.query.order_by(Post.created_at.desc()).all()
+    form = PostForm()
+    return render_template('index.html', posts=posts, form=form)
 
-@app.route('/send', methods=['POST'])
-def send_message():
-    name = request.form.get('name', '').strip()
-    email = request.form.get('email', '').strip()
-    message = request.form.get('message', '').strip()
+@app.route('/register', methods=['GET', 'POST'])
+def register():
+    form = RegisterForm()
+    if form.validate_on_submit():
+        if User.query.filter_by(username=form.username.data).first():
+            flash('Username already taken', 'danger')
+            return redirect(url_for('register'))
+        user = User(username=form.username.data)
+        user.set_password(form.password.data)
+        db.session.add(user)
+        db.session.commit()
+        flash('Account created. Please log in.', 'success')
+        return redirect(url_for('login'))
+    return render_template('register.html', form=form)
 
-    if not name or not email or not message:
-        return "Name, email and message are required.", 400
+@app.route('/login', methods=['GET', 'POST'])
+def login():
+    form = LoginForm()
+    if form.validate_on_submit():
+        user = User.query.filter_by(username=form.username.data).first()
+        if user and user.check_password(form.password.data):
+            login_user(user)
+            flash('Logged in successfully', 'success')
+            return redirect(url_for('index'))
+        flash('Invalid credentials', 'danger')
+    return render_template('login.html', form=form)
 
-    timestamp = datetime.utcnow().isoformat()
-    with sqlite3.connect(DATABASE) as conn:
-        conn.execute("INSERT INTO messages (name, email, message, timestamp) VALUES (?, ?, ?, ?)",
-                     (name, email, message, timestamp))
+@app.route('/logout')
+@login_required
+def logout():
+    logout_user()
+    flash('Logged out', 'info')
+    return redirect(url_for('index'))
 
-    # Optional: Send email (comment out if no credentials)
+@app.route('/upload', methods=['POST'])
+@login_required
+def upload():
+    # handle image upload and create a post
+    if 'image' not in request.files:
+        flash('No image part', 'danger')
+        return redirect(url_for('index'))
+    file = request.files['image']
+    caption = request.form.get('caption', '')
+    if file.filename == '':
+        flash('No selected file', 'danger')
+        return redirect(url_for('index'))
+    if file and allowed_file(file.filename):
+        filename = secure_filename(f"{current_user.id}_{int(datetime.utcnow().timestamp())}_{file.filename}")
+        filepath = os.path.join(app.config['UPLOAD_FOLDER'], filename)
+        file.save(filepath)
+        post = Post(image_filename=filename, caption=caption, user_id=current_user.id)
+        db.session.add(post)
+        db.session.commit()
+        flash('Posted!', 'success')
+    else:
+        flash('Invalid file type', 'danger')
+    return redirect(url_for('index'))
+
+@app.route('/user/<username>')
+def profile(username):
+    user = User.query.filter_by(username=username).first_or_404()
+    posts = Post.query.filter_by(user_id=user.id).order_by(Post.created_at.desc()).all()
+    return render_template('profile.html', user=user, posts=posts)
+
+@app.route('/market')
+def market():
+    # returns JSON with market prices for a small set of Wall Street indices / tickers
+    # You can change tickers as needed.
+    tickers = ['^DJI', '^GSPC', '^IXIC', 'AAPL', 'MSFT']
+    data = {}
     try:
-        smtp_host = "smtp.mail.me.com"
-        smtp_port = 587
-
-        msg = MIMEText(f"Name: {name}\nEmail: {email}\n\nMessage:\n{message}", _charset="utf-8")
-        msg['Subject'] = Header(f"New message from website — {name}", 'utf-8')
-        msg['From'] = ICLOUD_EMAIL
-        msg['To'] = ICLOUD_EMAIL
-        msg['Reply-To'] = email
-
-        server = smtplib.SMTP(smtp_host, smtp_port)
-        server.starttls()
-        server.login(ICLOUD_EMAIL, ICLOUD_APP_PASSWORD)
-        server.sendmail(ICLOUD_EMAIL, [ICLOUD_EMAIL], msg.as_string())
-        server.quit()
+        yf_tickers = yf.Tickers(' '.join(tickers))
+        for t in tickers:
+            tk = yf_tickers.tickers.get(t)
+            if tk is None:
+                # fallback single ticker fetch
+                tk = yf.Ticker(t)
+            info = tk.history(period='1d')
+            last_price = None
+            change = None
+            if not info.empty:
+                last_price = float(info['Close'][-1])
+                open_price = float(info['Open'][-1])
+                change = last_price - open_price
+            else:
+                # try fast info
+                q = tk.fast_info if hasattr(tk, 'fast_info') else {}
+                last_price = q.get('last_price')
+            data[t] = {'last': last_price, 'change': change}
     except Exception as e:
-        print("Email send error:", e)
+        # if yfinance fails, return empty with error message
+        return jsonify({'error': 'Failed to fetch market data', 'detail': str(e)}), 500
+    return jsonify(data)
 
-    return redirect(url_for('thank_you'))
+@app.route('/uploads/<filename>')
+def uploaded_file(filename):
+    return send_from_directory(app.config['UPLOAD_FOLDER'], filename)
 
-@app.route('/thank-you')
-def thank_you():
-    return '''<!doctype html>
+# --- Templates (rendered from files listed below) ---
+
+if __name__ == '__main__':
+    app.run(debug=True)
+
+--- templates/base.html ---
+<!doctype html>
 <html lang="en">
-<head><meta charset="utf-8" /><title>Thank You!</title></head>
-<body>
-  <h1>Thank you!</h1>
-  <p>Your message was received and emailed to the creator.</p>
-  <p><a href="/">Back to Home</a></p>
-</body>
-</html>'''
+  <head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Flask Social</title>
+    <link rel="stylesheet" href="{{ url_for('static', filename='styles.css') }}">
+  </head>
+  <body>
+    <nav class="topbar">
+      <div class="brand"><a href="/">FlaskSocial</a></div>
+      <div class="menu">
+        {% if current_user.is_authenticated %}
+          <a href="/user/{{ current_user.username }}">{{ current_user.username }}</a>
+          <a href="/logout">Logout</a>
+        {% else %}
+          <a href="/login">Login</a>
+          <a href="/register">Register</a>
+        {% endif %}
+      </div>
+    </nav>
 
-@app.route('/admin')
-@requires_auth
-def admin_panel():
-    with sqlite3.connect(DATABASE) as conn:
-        cursor = conn.execute("SELECT name, email, message, timestamp FROM messages ORDER BY timestamp DESC LIMIT 100")
-        messages = cursor.fetchall()
+    <div class="market-banner" id="market-banner">
+      Loading market prices...
+    </div>
 
-    html = '''<!doctype html>
-<html lang="en">
-<head><meta charset="utf-8" /><title>Admin Panel</title></head><body>
-<h1>Admin Panel: Messages</h1>
-<table border="1" cellpadding="5" cellspacing="0">
-<tr><th>Name</th><th>Email</th><th>Message</th><th>Timestamp (UTC)</th></tr>'''
+    <div class="container">
+      {% with messages = get_flashed_messages(with_categories=true) %}
+        {% if messages %}
+          <ul class="flashes">
+            {% for category, message in messages %}
+              <li class="flash {{ category }}">{{ message }}</li>
+            {% endfor %}
+          </ul>
+        {% endif %}
+      {% endwith %}
 
-    for name, email, message, timestamp in messages:
-        html += f'<tr><td>{esc(name)}</td><td>{esc(email)}</td><td>{esc(message)}</td><td>{esc(timestamp)}</td></tr>'
+      {% block content %}{% endblock %}
+    </div>
 
-    html += '</table></body></html>'
-    return html
+    <script>
+    async function fetchMarket(){
+      try{
+        const res = await fetch('/market');
+        const json = await res.json();
+        if(json.error){
+          document.getElementById('market-banner').innerText = 'Market data unavailable';
+          return;
+        }
+        let parts = [];
+        for(const k in json){
+          const v = json[k];
+          const price = v.last ? v.last.toFixed(2) : 'N/A';
+          const ch = (v.change==null) ? '' : (v.change>=0? '+':'') + v.change.toFixed(2);
+          parts.push(`${k}: ${price} ${ch}`);
+        }
+        document.getElementById('market-banner').innerText = parts.join('  |  ');
+      }catch(e){
+        document.getElementById('market-banner').innerText = 'Market fetch failed';
+      }
+    }
+    fetchMarket();
+    setInterval(fetchMarket, 60 * 1000); // refresh every minute
+    </script>
+  </body>
+</html>
 
-if __name__ == "__main__":
-    app.run(host='0.0.0.0', port=8000)
+--- templates/index.html ---
+{% extends 'base.html' %}
+{% block content %}
+  <div class="left">
+    {% if current_user.is_authenticated %}
+      <form action="/upload" method="post" enctype="multipart/form-data" class="upload-form">
+        <label>Choose image:</label>
+        <input type="file" name="image" accept="image/*" required>
+        <textarea name="caption" placeholder="Write a caption..." rows="2"></textarea>
+        <button type="submit">Post</button>
+      </form>
+    {% else %}
+      <p><a href="/login">Log in</a> to post images.</p>
+    {% endif %}
+
+    <div class="feed">
+      {% for post in posts %}
+        <div class="post">
+          <div class="post-header">
+            <a href="/user/{{ post.user.username }}">{{ post.user.username }}</a>
+            <span class="time">{{ post.created_at.strftime('%Y-%m-%d %H:%M') }}</span>
+          </div>
+          <div class="post-image">
+            <img src="/uploads/{{ post.image_filename }}" alt="post image">
+          </div>
+          {% if post.caption %}
+            <div class="caption">{{ post.caption }}</div>
+          {% endif %}
+        </div>
+      {% else %}
+        <p>No posts yet — be the first!</p>
+      {% endfor %}
+    </div>
+  </div>
+  <aside class="right">
+    <h3>Users</h3>
+    <ul>
+      {% for user in users if false %}{% endfor %}
+      <!-- could add user list here -->
+    </ul>
+  </aside>
+{% endblock %}
+
+--- templates/login.html ---
+{% extends 'base.html' %}
+{% block content %}
+  <div class="auth">
+    <h2>Login</h2>
+    <form method="post">
+      {{ form.hidden_tag() }}
+      <div>{{ form.username.label }} {{ form.username() }}</div>
+      <div>{{ form.password.label }} {{ form.password() }}</div>
+      <div>{{ form.submit() }}</div>
+    </form>
+  </div>
+{% endblock %}
+
+--- templates/register.html ---
+{% extends 'base.html' %}
+{% block content %}
+  <div class="auth">
+    <h2>Register</h2>
+    <form method="post">
+      {{ form.hidden_tag() }}
+      <div>{{ form.username.label }} {{ form.username() }}</div>
+      <div>{{ form.password.label }} {{ form.password() }}</div>
+      <div>{{ form.confirm.label }} {{ form.confirm() }}</div>
+      <div>{{ form.submit() }}</div>
+    </form>
+  </div>
+{% endblock %}
+
+--- templates/profile.html ---
+{% extends 'base.html' %}
+{% block content %}
+  <h2>{{ user.username }}'s profile</h2>
+  <div class="user-posts">
+    {% for post in posts %}
+      <div class="post">
+        <div class="post-image"><img src="/uploads/{{ post.image_filename }}"></div>
+        <div class="caption">{{ post.caption }}</div>
+      </div>
+    {% else %}
+      <p>No posts yet.</p>
+    {% endfor %}
+  </div>
+{% endblock %}
+
+--- static/styles.css ---
+body{font-family: Arial, sans-serif; margin:0; background:#f6f7fb}
+.topbar{display:flex;justify-content:space-between;align-items:center;padding:10px 20px;background:#fff;border-bottom:1px solid #ddd}
+.topbar .brand a{font-weight:700;text-decoration:none;color:#333}
+.topbar .menu a{margin-left:12px;text-decoration:none;color:#007bff}
+.container{max-width:1000px;margin:20px auto;display:flex;gap:20px}
+.left{flex:2}
+.right{flex:1}
+.upload-form{background:#fff;padding:12px;border:1px solid #e2e2e2;border-radius:6px;margin-bottom:16px}
+.feed .post{background:#fff;border:1px solid #eaeaea;border-radius:6px;margin-bottom:12px;padding:8px}
+.post-image img{max-width:100%;height:auto;display:block;border-radius:4px}
+.market-banner{background:#111;color:#fff;padding:8px 12px;text-align:center}
+.auth{max-width:400px;background:#fff;padding:16px;border-radius:6px}
+.flashes{list-style:none;padding:0}
+.flash{padding:8px;margin-bottom:8px;border-radius:4px}
+.flash.success{background:#e6ffed;border:1px solid #b8f1c6}
+.flash.danger{background:#ffe6e6;border:1px solid #f1b8b8}
+
+--- END OF CONTENT ---
+
+# Save this canvas into files in a project directory. Follow README to run.
