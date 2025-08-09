@@ -1,26 +1,53 @@
 """
-Market Speculation Hub - Bloomberg-style frontend + backend
+Market Speculation Hub - Complete Flask App
 
-Instructions same as before (see previous comments).
+Instructions:
+
+1) Install Flask:
+   pip install flask
+
+2) Set environment variables (replace placeholders):
+
+   On Linux/macOS:
+     export ADMIN_USERNAME=youradminusername
+     export ADMIN_PASSWORD=yourstrongpassword
+     export ICLOUD_EMAIL=nickmaingi06@icloud.com
+     export ICLOUD_APP_PASSWORD=your-icloud-app-password
+
+   On Windows (PowerShell):
+     setx ADMIN_USERNAME youradminusername
+     setx ADMIN_PASSWORD yourstrongpassword
+     setx ICLOUD_EMAIL nickmaingi06@icloud.com
+     setx ICLOUD_APP_PASSWORD your-icloud-app-password
+
+3) Run the app:
+   python app.py
+
+4) Visit:
+   http://localhost:8000/          - Contact form
+   http://localhost:8000/admin     - Admin panel (use admin creds)
+
 """
 
 from flask import Flask, request, redirect, url_for, Response
+import sqlite3
+import os
+from datetime import datetime
 import smtplib
 from email.mime.text import MIMEText
 from email.header import Header
-import sqlite3
 from functools import wraps
-import os
-from datetime import datetime
 
 app = Flask(__name__)
 DATABASE = 'messages.db'
 
+# Load credentials from environment variables
 ADMIN_USERNAME = os.getenv('ADMIN_USERNAME', 'admin')
 ADMIN_PASSWORD = os.getenv('ADMIN_PASSWORD', 'password')
 ICLOUD_EMAIL = os.getenv('ICLOUD_EMAIL', 'nickmaingi06@icloud.com')
 ICLOUD_APP_PASSWORD = os.getenv('ICLOUD_APP_PASSWORD', '')
 
+# Initialize database with messages table
 def init_db():
     with sqlite3.connect(DATABASE) as conn:
         conn.execute('''
@@ -35,6 +62,7 @@ def init_db():
 
 init_db()
 
+# Basic HTTP auth for admin page
 def check_auth(username, password):
     return username == ADMIN_USERNAME and password == ADMIN_PASSWORD
 
@@ -52,8 +80,15 @@ def requires_auth(f):
         return f(*args, **kwargs)
     return decorated
 
-def esc(s):
-    return (s or '').replace('&', '&amp;').replace('<','&lt;').replace('>','&gt;').replace('"','&quot;').replace("'", '&#39;')
+# Simple HTML escape to avoid XSS in admin panel
+def esc(text):
+    if not text:
+        return ''
+    return (text.replace('&', '&amp;')
+                .replace('<', '&lt;')
+                .replace('>', '&gt;')
+                .replace('"', '&quot;')
+                .replace("'", '&#39;'))
 
 @app.route('/', methods=['GET'])
 def index():
@@ -65,21 +100,17 @@ def index():
   <title>Market Speculation Hub</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <style>
-    /* Reset & base */
-    * {
-      box-sizing: border-box;
-      margin: 0; padding: 0;
-    }
+    /* Bloomberg-inspired dark theme */
+    * { box-sizing: border-box; margin: 0; padding: 0; }
     body {
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
       background-color: #0f1113;
       color: #f1f1f1;
-      line-height: 1.6;
       min-height: 100vh;
       display: flex;
       flex-direction: column;
       align-items: center;
-      padding: 0 1rem 3rem;
+      padding: 1rem;
     }
     header {
       background-color: #161b22;
@@ -89,11 +120,11 @@ def index():
       display: flex;
       justify-content: space-between;
       align-items: center;
-      border-bottom: 2px solid #d3a518; /* Bloomberg gold */
-      box-shadow: 0 2px 4px rgba(0,0,0,0.8);
+      border-bottom: 2px solid #d3a518;
       position: sticky;
       top: 0;
       z-index: 10;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.8);
     }
     header h1 {
       font-weight: 700;
@@ -113,7 +144,6 @@ def index():
     nav a:hover {
       color: #f5c518;
     }
-
     main {
       max-width: 600px;
       width: 100%;
@@ -183,6 +213,8 @@ def index():
       color: #777;
       font-size: 0.9rem;
       user-select: none;
+      max-width: 600px;
+      text-align: center;
     }
     @media (max-width: 480px) {
       main {
@@ -234,7 +266,6 @@ def send_message():
         return "Name, email and message are required.", 400
 
     timestamp = datetime.utcnow().isoformat()
-
     with sqlite3.connect(DATABASE) as conn:
         conn.execute(
             "INSERT INTO messages (name, email, message, timestamp) VALUES (?, ?, ?, ?)",
@@ -269,7 +300,7 @@ def thank_you():
 <html lang="en">
 <head>
   <meta charset="utf-8" />
-  <title>Thanks!</title>
+  <title>Thank You!</title>
   <style>
     body {
       font-family: "Helvetica Neue", Helvetica, Arial, sans-serif;
