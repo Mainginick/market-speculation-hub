@@ -1,0 +1,18 @@
+services:
+  - type: web
+    name: market-speculation-hub
+    env: python
+    plan: free
+    buildCommand: pip install -r requirements.txt
+    startCommand: gunicorn -w 1 -t 120 app:app
+    envVars:
+      - key: SECRET_KEY
+        generateValue: true
+      - key: ENABLE_SCHEDULER
+        value: "1"
+    healthCheckPath: /healthz
+    disk:
+      name: app-data
+      mountPath: /opt/render/project/src/static/uploads
+      sizeGB: 1
+    autoDeploy: true
